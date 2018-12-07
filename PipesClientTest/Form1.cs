@@ -1392,7 +1392,7 @@ namespace PipesClientTest
                 string[] mt = new string[GlobeVal.myconfigfile.machinecount+1];
                 mt[0] = sname[i];
                 mt[1] = (i + 1).ToString();
-                mt[2] = (i + 100).ToString(); 
+                mt[2] = (i + 3).ToString(); 
                 dataGridView1.Rows.Add(mt);
             }
             timer1.Enabled = true;
