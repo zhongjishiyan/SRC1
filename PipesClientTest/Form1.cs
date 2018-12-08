@@ -161,7 +161,11 @@ namespace PipesClientTest
             //    "cmdUnit:" + _pipeServer._TransferCmd.cmdUnit.ToString());
 
             //modMain.blnPipeConnectOK[_pipeServer._TransferCmd.FuncID - 1] = true;
-            //modMain.intPipeErrorNum[_pipeServer._TransferCmd.FuncID - 1] = 0;
+            //modMain.intPipeErrorNum[_pipeServer._TransferCmd.FuncID - 1] = 0
+
+         
+
+
             switch (_pipeServer._TransferCmd.cmdName )
             {
                 case modMain.ConnectToEdcAll:
@@ -179,10 +183,13 @@ namespace PipesClientTest
                 case (int)DoSA.DoSA_EXT_CMD.EXT_CMD_EDC_OFF :
                     DriveOff();
                     break;
-                case (int)DoSA.DoSA_EXT_CMD.EXT_CMD_START:
+                case (int) DoSA.DoSA_EXT_CMD.EXT_CMD_START:
                     TestStart();
                     modMain.blnStartTest[_pipeServer._TransferCmd.FuncID - 1] = true;
-                    break;
+
+                   
+                   
+                        break;
                 case (int)DoSA.DoSA_EXT_CMD.EXT_CMD_STOP:
                     TestEnd();
                     break;
@@ -1094,6 +1101,11 @@ namespace PipesClientTest
             {
                 SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_START, 0, 0);
             }
+            if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.SIM)
+            {
+                Demo.readdemo(Application.StartupPath + @"\demo\计算演示1.txt");
+               
+            }
         }
 
         ///----------------------------------------------------------------------
@@ -1104,6 +1116,12 @@ namespace PipesClientTest
             if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDC220 || GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDCi15)
             {
                 SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_STOP, 0, 0);
+            }
+            if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.SIM)
+            {
+                Demo.mdemoline = 0 ;
+                Demo.mdemo = false;
+
             }
         }
 
@@ -1213,6 +1231,8 @@ namespace PipesClientTest
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            GlobeVal.myconfigfile = new ConfigFile();
+            GlobeVal.myconfigfile = GlobeVal.myconfigfile.DeSerializeNow(Application.StartupPath + @"\sys\系统设置.ini");
             _pipeServer.Listen("TestPipe1");
         }
 
@@ -1221,43 +1241,103 @@ namespace PipesClientTest
             //Application.DoEvents();
             if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.SIM )
             {
-                for (int i = 0; i < GlobeVal.myconfigfile.machinecount; i++)
+                if (Demo.mdemo == true)
                 {
-                    _TransferData.FuncID [i] = Convert.ToInt16(dataGridView1.Rows[1].Cells[i + 1].Value);
+                    for (int i = 0; i < GlobeVal.myconfigfile.machinecount; i++)
+                    {
 
-                    _TransferData.EDC_STATE [i] = Convert.ToInt16(dataGridView1.Rows[2].Cells[i + 1].Value);
 
-                    _TransferData.ControlValue[i] = Convert.ToInt16(dataGridView1.Rows[3].Cells[i + 1].Value);
+                        if (GlobeVal.myconfigfile.SimulationMode[i]==0)
+                        {
+                            _TransferData.FuncID[i] = Convert.ToInt16(dataGridView1.Rows[1].Cells[i + 1].Value);
 
-                    _TransferData.CHANNEL_F[i] = Convert.ToSingle(dataGridView1.Rows[4].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+                            _TransferData.EDC_STATE[i] = Convert.ToInt16(dataGridView1.Rows[2].Cells[i + 1].Value);
 
-                    _TransferData.CHANNEL_S[i] = Convert.ToSingle(dataGridView1.Rows[5].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+                            _TransferData.ControlValue[i] = Convert.ToInt16(dataGridView1.Rows[3].Cells[i + 1].Value);
 
-                    _TransferData.CHANNEL_4[i] = Convert.ToSingle(dataGridView1.Rows[6].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+                            _TransferData.CHANNEL_F[i] = Demo.mdemodata[Demo.mdemoline].load;
 
-                    _TransferData.CHANNEL_5[i] = Convert.ToSingle(dataGridView1.Rows[7].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+                            _TransferData.CHANNEL_S[i] = Demo.mdemodata[Demo.mdemoline].pos;
 
-                    _TransferData.CHANNEL_S[i] = Convert.ToSingle(dataGridView1.Rows[8].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+                            _TransferData.CHANNEL_4[i] = 0;
 
-                    _TransferData.Unbalancedness[i] = Convert.ToSingle(dataGridView1.Rows[9].Cells[i + 1].Value);
+                            _TransferData.CHANNEL_5[i] = 0;
 
-                    _TransferData.TemperatureControl[i] = Convert.ToSingle(dataGridView1.Rows[10].Cells[i + 1].Value);
+                            _TransferData.CHANNEL_E[i] = Demo.mdemodata[Demo.mdemoline].ext ;
 
-                    _TransferData.CHANNEL_7[i] = Convert.ToSingle(dataGridView1.Rows[11].Cells[i + 1].Value);
+                            _TransferData.Unbalancedness[i] = Convert.ToSingle(dataGridView1.Rows[9].Cells[i + 1].Value);
 
-                    _TransferData.CHANNEL_8[i] = Convert.ToSingle(dataGridView1.Rows[12].Cells[i + 1].Value);
+                            _TransferData.TemperatureControl[i] = Convert.ToSingle(dataGridView1.Rows[10].Cells[i + 1].Value);
 
-                    _TransferData.CHANNEL_9[i] = Convert.ToSingle(dataGridView1.Rows[13].Cells[i + 1].Value);
+                            _TransferData.CHANNEL_7[i] = Convert.ToSingle(dataGridView1.Rows[11].Cells[i + 1].Value);
 
-                    _TransferData.TemperatureGradient[i] = Convert.ToSingle(dataGridView1.Rows[14].Cells[i + 1].Value);
+                            _TransferData.CHANNEL_8[i] = Convert.ToSingle(dataGridView1.Rows[12].Cells[i + 1].Value);
 
-                    _TransferData.TOTAL_TIME[i] = Convert.ToSingle(dataGridView1.Rows[15].Cells[i + 1].Value);
+                            _TransferData.CHANNEL_9[i] = Convert.ToSingle(dataGridView1.Rows[13].Cells[i + 1].Value);
 
-                    _TransferData.CYCLE_COUNT[i] = Convert.ToInt64(dataGridView1.Rows[16].Cells[i + 1].Value);
+                            _TransferData.TemperatureGradient[i] = Convert.ToSingle(dataGridView1.Rows[14].Cells[i + 1].Value);
 
-                    _TransferData.LOOP_COUNT[i] = Convert.ToInt64(dataGridView1.Rows[17].Cells[i + 1].Value);
+                            _TransferData.TOTAL_TIME[i] = Convert.ToSingle(dataGridView1.Rows[15].Cells[i + 1].Value);
 
-                    _TransferData.TOTAL_TIME[i] = Environment.TickCount / 1000.0;
+                            _TransferData.CYCLE_COUNT[i] = Convert.ToInt64(dataGridView1.Rows[16].Cells[i + 1].Value);
+
+                            _TransferData.LOOP_COUNT[i] = Convert.ToInt64(dataGridView1.Rows[17].Cells[i + 1].Value);
+
+                            _TransferData.TOTAL_TIME[i] = Environment.TickCount / 1000.0;
+                            _TransferData.TEST_TIME[i] = Demo.mdemodata[Demo.mdemoline].time;
+                            if (Environment.TickCount / 1000.0 - Demo.mdemotime >= Demo.mdemodata[Demo.mdemoline].time)
+                            {
+                                Demo.mdemoline = Demo.mdemoline + 1;
+                            }
+                            if(Demo.mdemoline > Demo.mdemodata.Count-1 )
+                            {
+                                Demo.mdemo = false; 
+                            }
+                        }
+                     }
+                }
+                else
+                {
+                    for (int i = 0; i < GlobeVal.myconfigfile.machinecount; i++)
+                    {
+                        _TransferData.FuncID[i] = Convert.ToInt16(dataGridView1.Rows[1].Cells[i + 1].Value);
+
+                        _TransferData.EDC_STATE[i] = Convert.ToInt16(dataGridView1.Rows[2].Cells[i + 1].Value);
+
+                        _TransferData.ControlValue[i] = Convert.ToInt16(dataGridView1.Rows[3].Cells[i + 1].Value);
+
+                        _TransferData.CHANNEL_F[i] = Convert.ToSingle(dataGridView1.Rows[4].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+
+                        _TransferData.CHANNEL_S[i] = Convert.ToSingle(dataGridView1.Rows[5].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+
+                        _TransferData.CHANNEL_4[i] = Convert.ToSingle(dataGridView1.Rows[6].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+
+                        _TransferData.CHANNEL_5[i] = Convert.ToSingle(dataGridView1.Rows[7].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+
+                        _TransferData.CHANNEL_E[i] = Convert.ToSingle(dataGridView1.Rows[8].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+
+                        _TransferData.Unbalancedness[i] = Convert.ToSingle(dataGridView1.Rows[9].Cells[i + 1].Value);
+
+                        _TransferData.TemperatureControl[i] = Convert.ToSingle(dataGridView1.Rows[10].Cells[i + 1].Value);
+
+                        _TransferData.CHANNEL_7[i] = Convert.ToSingle(dataGridView1.Rows[11].Cells[i + 1].Value);
+
+                        _TransferData.CHANNEL_8[i] = Convert.ToSingle(dataGridView1.Rows[12].Cells[i + 1].Value);
+
+                        _TransferData.CHANNEL_9[i] = Convert.ToSingle(dataGridView1.Rows[13].Cells[i + 1].Value);
+
+                        _TransferData.TemperatureGradient[i] = Convert.ToSingle(dataGridView1.Rows[14].Cells[i + 1].Value);
+
+                        _TransferData.TOTAL_TIME[i] = Convert.ToSingle(dataGridView1.Rows[15].Cells[i + 1].Value);
+
+                        _TransferData.CYCLE_COUNT[i] = Convert.ToInt64(dataGridView1.Rows[16].Cells[i + 1].Value);
+
+                        _TransferData.LOOP_COUNT[i] = Convert.ToInt64(dataGridView1.Rows[17].Cells[i + 1].Value);
+
+                        _TransferData.TOTAL_TIME[i] = Environment.TickCount / 1000.0;
+                        _TransferData.TEST_TIME[i] = Environment.TickCount / 1000.0;
+
+                    }
                 }
             }
             else if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDCi15 || GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDC220)

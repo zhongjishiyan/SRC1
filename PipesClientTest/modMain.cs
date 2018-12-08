@@ -6,6 +6,8 @@ using System.IO;
 
 namespace PipesClientTest
 {
+
+   
     public class modMain
     {
         //public static int SysNum = 3;
@@ -24,6 +26,8 @@ namespace PipesClientTest
         public const int CloseAll = 10003;
         public const int CloseLink_DoSAHdl = 10004;
         public const int TestPara_Name = 10005;
+
+
 
         //数据文件
         public static int[] EDC_STATE;//控制器联机状态

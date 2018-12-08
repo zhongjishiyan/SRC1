@@ -8,6 +8,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Windows.Forms;
 
 namespace PipesClientTest
 {
@@ -16,10 +18,64 @@ namespace PipesClientTest
         public static ConfigFile myconfigfile;
     }
 
-    public struct ConfigFile
+    [Serializable]
+    public class ConfigFile
     {
         public int machinecount;
         public int mode;
+
+        public int[] SimulationMode;
+
+        public ConfigFile()
+        {
+            SimulationMode = new int[100];
+        }
+
+        public void SerializeNow(string filename)
+        {
+
+            FileStream fileStream =
+            new FileStream(filename, FileMode.Create);
+            BinaryFormatter b = new BinaryFormatter();
+            b.Serialize(fileStream, this);
+
+            fileStream.Close();
+        }
+
+        public ConfigFile DeSerializeNow(string filename)
+        {
+            ConfigFile c = new PipesClientTest.ConfigFile ();
+            try
+            {
+
+
+                using (FileStream fileStream =
+                 new FileStream(filename,
+                 FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    BinaryFormatter b = new BinaryFormatter();
+
+                    c = b.Deserialize(fileStream) as ConfigFile;
+
+                
+                    fileStream.Close();
+
+
+
+                   }
+            }
+            catch (Exception e1)
+            {
+                c = new PipesClientTest.ConfigFile();
+
+                 MessageBox.Show(e1.Message, "读取文件");
+            }
+            finally
+            {
+
+            }
+            return (c);
+         }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
