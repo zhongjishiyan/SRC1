@@ -36,6 +36,7 @@ namespace PipesClientTest
         private void button1_Click(object sender, EventArgs e)
         {
             int l;
+            int j;
             int.TryParse(textBox1.Text, out l);
             GlobeVal.myconfigfile.machinecount = l;
             GlobeVal.myconfigfile.mode = comboBox1.SelectedIndex;

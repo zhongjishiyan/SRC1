@@ -180,7 +180,10 @@ namespace PipesClientTest
         public void init()
         {
             int size = 100;
-
+            if (GlobeVal.myconfigfile.machinecount > 0)
+            {
+                size = GlobeVal.myconfigfile.machinecount;
+            }
             TOTAL_TIME = new double[size];
             TEST_TIME = new double[size];
             CHANNEL_S = new float[size];

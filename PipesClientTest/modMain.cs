@@ -5,9 +5,7 @@ using Doli.DoSANet;
 using System.IO;
 
 namespace PipesClientTest
-{
-
-   
+{   
     public class modMain
     {
         //public static int SysNum = 3;
@@ -17,25 +15,26 @@ namespace PipesClientTest
         public static bool[] blnPipeConnectOK;//pipe连接正常
         public static int[] intPipeErrorNum;//pipe连接没有接收数据的次数     
        
-    public const int MAX_SENSORS = 16;
-    public const int DoSAVersionEDC220 = 9;
-    public const int DoSAVersionEDCi15 = 10;
-
-    public const int ConnectToEdcAll = 10000;
-    public const int ConnectToEdcFuncID = 10001;
-    public const int CloseLink_FuncID = 10002;
-    public const int CloseAll = 10003;
-    public const int CloseLink_DoSAHdl = 10004;
-    public const int TestPara_Name = 10005;
-
-   
-
+        public const int MAX_SENSORS = 16;
+        public const int DoSAVersionEDC220 = 9;
+        public const int DoSAVersionEDCi15 = 10;
+        public const int ConnectToEdcAll = 10000;
+        public const int ConnectToEdcFuncID = 10001;
+        public const int CloseLink_FuncID = 10002;
+        public const int CloseAll = 10003;
+        public const int CloseLink_DoSAHdl = 10004;
+        public const int TestPara_Name = 10005;
+        public const int Config_File = 10006;//前台软件发送来的设备数量和控制器类型等配置文件
+        public const int Test_Recovery = 10007;//恢复试验
 
 
-    //数据文件
+
+
+        //数据文件
         public static int[] EDC_STATE;//控制器联机状态
         public static float[] USED_BUFFER;  //缓冲区
         public static int[] CMD_BIT;
+        public static int[] TEST_END;//0=无结束试验信号；1=试验时间到停止；2=异常停止；
         public static long[] LineNumber;
 
         public static string[] ParaFile;     //参数文件名
@@ -45,6 +44,12 @@ namespace PipesClientTest
         //1号设备蠕变数据文件后缀名为 .001_Creep_Data；持久参数后缀名为 .001_Ruptu_Data；；松弛参数后缀名为 .001_Relax_Data；
         public static string[] RecoFile;     //记录文件名
         public static string[] TempFile;     //
+        public static double[] TimePass;     //保存数据用
+        public static string strEDCfile = @"D:\EDC\"; //EDC file
+        public static string[,] SensorName;
+        public static string strKeepfile = Environment.CurrentDirectory + @"\KEEPTEST.DAT"; //记录当前试验的参数文件和试验状态（试验，停止）。
+        //public static string strConfigfile = Environment.CurrentDirectory + @"\KEEPTEST.DAT"; //记录当前试验的参数文件和试验状态（试验，停止）。
+
         ///试验参数变量
         ///48段试验段数，实际为12段，预留36段；单位参考public num CtlUnit
         public static int[,] PARA_CTRLn;   //n段的控制对象，1=负荷；0=位移；2=变形。
@@ -174,7 +179,22 @@ namespace PipesClientTest
         public static int[] Sample_Thickness_Unit;           //矩形试样的厚度的单位；0=mm；1=英寸inch
         public static float[] Sample_Gauge_Length;           //试样的标距
 
-
+        public static double[] ADD_TOTAL_TIME;//EXT_CMD_PARA_CREEP_PRINT_V00  启动试验的总时间     ，恢复试验时在实时数据加上该值
+        public static double[] ADD_TEST_TIME;//EXT_CMD_PARA_CREEP_PRINT_V01   加载开始的试验时间    ，恢复试验时在实时数据加上该值
+        public static float[] ADD_CHANNEL_S;//EXT_CMD_PARA_CREEP_PRINT_V02  位移                     ，恢复试验时在实时数据加上该值
+        public static float[] ADD_CHANNEL_F;//EXT_CMD_PARA_CREEP_PRINT_V03  负荷                     ，恢复试验时在实时数据加上该值    
+        public static float[] ADD_CHANNEL_E;//EXT_CMD_PARA_CREEP_PRINT_V04  平均变形               ，恢复试验时在实时数据加上该值
+        public static float[] ADD_CHANNEL_4;//EXT_CMD_PARA_CREEP_PRINT_V05  变形1                    ，恢复试验时在实时数据加上该值
+        public static float[] ADD_CHANNEL_5;//EXT_CMD_PARA_CREEP_PRINT_V06  变形2                 ，恢复试验时在实时数据加上该值
+        public static float[] ADD_CHANNEL_7;//EXT_CMD_PARA_CREEP_PRINT_V07  温度上                 ，恢复试验时在实时数据加上该值
+        public static float[] ADD_CHANNEL_8;//EXT_CMD_PARA_CREEP_PRINT_V08  温度中                 ，恢复试验时在实时数据加上该值
+        public static float[] ADD_CHANNEL_9;//EXT_CMD_PARA_CREEP_PRINT_V09  温度下                 ，恢复试验时在实时数据加上该值
+        public static long[] ADD_CYCLE_COUNT;//EXT_CMD_PARA_CREEP_PRINT_V10  波形个数              ，恢复试验时在实时数据加上该值
+        public static long[] ADD_LOOP_COUNT; //EXT_CMD_PARA_CREEP_PRINT_V11  循环次数              ，恢复试验时在实时数据加上该值
+        public static int[] ADD_TEST_STEP;//EXT_CMD_PARA_CREEP_PRINT_V12   试验段数               ，恢复试验时在实时数据加上该值
+        public static float[] ADD_Free_13;//EXT_CMD_PARA_CREEP_PRINT_V13  空闲变量13                ，恢复试验时在实时数据加上该值
+        public static float[] ADD_Free_14;//EXT_CMD_PARA_CREEP_PRINT_V14  空闲变量14                ，恢复试验时在实时数据加上该值
+        public static float[] ADD_Free_15;//EXT_CMD_PARA_CREEP_PRINT_V15  空闲变量15                ，恢复试验时在实时数据加上该值
 
         public static void initValue(int machineNum)
         {
@@ -183,18 +203,22 @@ namespace PipesClientTest
             blnStartTest = new bool[machineNum];
             blnPipeConnectOK = new bool[machineNum];
             intPipeErrorNum = new int[machineNum];
-            
+
             EDC_STATE = new int[machineNum];
             USED_BUFFER = new float[machineNum];
-            CMD_BIT = new int[machineNum];
+            CMD_BIT = new int[machineNum];//
+            TEST_END = new int[machineNum];
             LineNumber = new long[machineNum];
-            
+
             ParaFile = new string[machineNum];
             DataFile = new string[machineNum];
             RecoFile = new string[machineNum];
             TempFile = new string[machineNum];
+            TimePass = new double[machineNum];
+            SensorName = new string[machineNum, modMain.MAX_SENSORS];
+
             ///48段试验段数，实际为12段，预留36段
-            PARA_CTRLn = new int[machineNum,48];   //12段的控制对象，1=负荷；0=位移；2=变形。
+            PARA_CTRLn = new int[machineNum, 48];   //12段的控制对象，1=负荷；0=位移；2=变形。
             PARA_MODEn = new int[machineNum, 48];   //12段的控制模式，0=斜波；1=保持；2=余弦波；3=三角波；4=方波。
 
             PARA_Pn = new float[machineNum, 48];       //12段的目标值
@@ -256,7 +280,7 @@ namespace PipesClientTest
             PRINT_DS = new float[machineNum];
             PRINT_DF = new float[machineNum];
             PRINT_DE = new float[machineNum];
-           
+
             END_SENSOR = new int[machineNum];
             END_MODE = new int[machineNum];
             END_VALUE = new float[machineNum];
@@ -264,7 +288,8 @@ namespace PipesClientTest
             END_ACTION = new int[machineNum];
             VEND_ACTION = new float[machineNum];
             VEND_ACTION_Unit = new int[machineNum];
-           
+
+
             LIMIT_SENSOR = new int[machineNum];
             LIMIT_PP = new float[machineNum];
             LIMIT_PP_Unit = new int[machineNum];
@@ -273,7 +298,7 @@ namespace PipesClientTest
             LIMIT_ACTION = new int[machineNum];
             VLIMIT_ACTION = new float[machineNum];
             VLIMIT_ACTION_Unit = new int[machineNum];
-            
+
             SOFT_SENSOR = new int[machineNum];
             SOFT_MODE = new int[machineNum];
             SOFT_VALUE = new float[machineNum];
@@ -282,7 +307,7 @@ namespace PipesClientTest
             VSOFT_ACTION = new float[machineNum];
             VSOFT_ACTION_Unit = new int[machineNum];
             SOFT_CycleNum = new long[machineNum];
-            
+
             SOFT_TEMP_SENSOR = new int[machineNum];
             SOFT_TEMP_MODE = new int[machineNum];
             SOFT_TEMP_VALUE = new float[machineNum];
@@ -290,14 +315,14 @@ namespace PipesClientTest
             SOFT_TEMP_ACTION = new int[machineNum];
             SOFT_VTEMP_ACTION = new float[machineNum];
             SOFT_VTEMP_ACTION_Unit = new int[machineNum];
-            
+
             SOFT_IS_WARN = new int[machineNum];
             SOFT_Load_WARN = new float[machineNum];
             SOFT_Position_WARN = new float[machineNum];
             SOFT_Extension_WARN = new float[machineNum];
             SOFT_TEMP_Fluct_WARN = new float[machineNum];
             SOFT_TEMP_Grad_WARN = new float[machineNum];
-            
+
             KeepTest = new int[machineNum];
             SaveMode = new int[machineNum];
             InvCycle = new long[machineNum];
@@ -312,25 +337,59 @@ namespace PipesClientTest
             Sample_Thickness_Unit = new int[machineNum];
             Sample_Gauge_Length = new float[machineNum];
 
+            ADD_TOTAL_TIME = new double[machineNum];
+            ADD_TEST_TIME = new double[machineNum];
+            ADD_CHANNEL_S = new float[machineNum];
+            ADD_CHANNEL_F = new float[machineNum];
+            ADD_CHANNEL_E = new float[machineNum];
+            ADD_CHANNEL_4 = new float[machineNum];
+            ADD_CHANNEL_5 = new float[machineNum];
+            ADD_CHANNEL_7 = new float[machineNum];
+            ADD_CHANNEL_8 = new float[machineNum];
+            ADD_CHANNEL_9 = new float[machineNum];
+            ADD_CYCLE_COUNT = new long[machineNum];
+            ADD_LOOP_COUNT = new long[machineNum];
+            ADD_TEST_STEP = new int[machineNum];
+            ADD_Free_13 = new float[machineNum];
+            ADD_Free_14 = new float[machineNum];
+            ADD_Free_15 = new float[machineNum];
 
             for (int sysNo = 0; sysNo < machineNum; sysNo++)
             {
-                MeDoSA[sysNo]= new DoSA();
+                MeDoSA[sysNo] = new DoSA();
                 blnStartTest[sysNo] = false;
                 blnPipeConnectOK[sysNo] = false;
                 intPipeErrorNum[sysNo] = 0;
                 EDC_STATE[sysNo] = 0;
                 USED_BUFFER[sysNo] = 0;
-                CMD_BIT[sysNo] = 0;               
+                CMD_BIT[sysNo] = 0;//
+                TEST_END[sysNo] = 0;//
                 LineNumber[sysNo] = 0;
+                ADD_TOTAL_TIME[sysNo] = 0;
+                ADD_TEST_TIME[sysNo] = 0;
+                ADD_CHANNEL_S[sysNo] = 0;
+                ADD_CHANNEL_F[sysNo] = 0;
+                ADD_CHANNEL_E[sysNo] = 0;
+                ADD_CHANNEL_4[sysNo] = 0;
+                ADD_CHANNEL_5[sysNo] = 0;
+                ADD_CHANNEL_7[sysNo] = 0;
+                ADD_CHANNEL_8[sysNo] = 0;
+                ADD_CHANNEL_9[sysNo] = 0;
+                ADD_CYCLE_COUNT[sysNo] = 0;
+                ADD_LOOP_COUNT[sysNo] = 0;
+                ADD_TEST_STEP[sysNo] = 0;
+                ADD_Free_13[sysNo] = 0;
+                ADD_Free_14[sysNo] = 0;
+                ADD_Free_15[sysNo] = 0;
+                TimePass[sysNo] = 0;
             }
         }
 
         public static void WriteLog(string strLog)
         {
             //string sFilePath = "d:\\" + DateTime.Now.ToString("yyyyMM");
-            string sFilePath = "d:" ;
-            string sFileName =  "rizhi" + DateTime.Now.ToString("yyyyMMdd") + ".log";
+            string sFilePath = "d:";
+            string sFileName = "rizhi" + DateTime.Now.ToString("yyyyMMdd") + ".log";
             sFileName = sFilePath + "\\" + sFileName; //文件的绝对路径
             if (!Directory.Exists(sFilePath))    //验证路径是否存在
             {
@@ -355,7 +414,7 @@ namespace PipesClientTest
             fs.Close();
         }
 
-        public static void WriteDataFile(string sFileName,string strLog)
+        public static void WriteDataFile(string sFileName, string strLog)
         {
             //string sFilePath = "d:\\" + DateTime.Now.ToString("yyyyMM");
             string sFilePath = "d:";
@@ -384,15 +443,15 @@ namespace PipesClientTest
             fs.Close();
         }
 
-        public enum CtlerType
+        public enum CtlerType : int
         {
             SIM = 0,
             EDCi15 = 1,
             EDC220 = 2,
-            TMC = 3,         
+            TMC = 3,
         }
 
-        public enum SENSOR
+        public enum SENSOR : int
         {
             SENSOR_S = 0,
             SENSOR_F = 1,
@@ -413,16 +472,16 @@ namespace PipesClientTest
             SENSOR_No = 255,
         }
 
-        public enum CtlMode
+        public enum CtlMode : int
         {
             Ramp = 0,
             Halt = 1,
             Cosine = 2,
             Triangle = 3,
-            Rectangle = 4,            
+            Rectangle = 4,
         }
 
-        public enum CtlUnit//控制量的单位
+        public enum CtlUnit : int//控制量的单位      标准单位为N，Second，N/S，mm，mm/S
         {
             No_Unit = -1,//无单位
 
@@ -430,23 +489,123 @@ namespace PipesClientTest
             um = 1,
 
             mm_min = 0,
-            um_min=1,
-            mm_s=2,
+            um_min = 1,
+            mm_s = 2,
             um_s = 3,
-            mm_h=4,
-            um_h=5,
+            mm_h = 4,
+            um_h = 5,
 
             N = 0,
 
-            N_S=0,
+            N_S = 0,
 
             Second = 0,
             min = 1,
-            
-            Hz=0,
 
-            C=0,
-            C_min=1,
+            Hz = 0,
+
+            C = 0,
+            C_min = 1,
+        }
+
+        public static float UnitValue_Load_Value(int LoadType, int LoadMode, float LoadValue, int ValueUnit, float LoadSpeed, int SpeedUnit)
+        {
+            float sngTime = 0;
+            //PARA_CTRLn = new int[machineNum, 48];   //12段的控制对象，1=负荷；0=位移；2=变形。
+            //PARA_MODEn = new int[machineNum, 48];   //12段的控制模式，0=斜波；1=保持；2=余弦波；3=三角波；4=方波。
+
+            //PARA_Pn = new float[machineNum, 48];       //12段的目标值
+            //PARA_Pn_Unit = new int[machineNum, 48];
+            //PARA_Tn = new float[machineNum, 48];   //12段的保持时间
+            //PARA_Tn_Unit = new int[machineNum, 48];
+            //PARA_Vn = new float[machineNum, 48];  //12段的加载速率
+            //PARA_Vn_Unit = new int[machineNum, 48];
+            if (LoadMode == (int)CtlMode.Ramp)
+            {
+                if (LoadType == (int)SENSOR.SENSOR_S || LoadType == (int)SENSOR.SENSOR_E)
+                {
+                    //value
+                    if (ValueUnit == (int)CtlUnit.mm)
+                    {
+                        LoadValue = LoadValue * 1;
+                    }
+                    else if (ValueUnit == (int)CtlUnit.um)
+                    {
+                        LoadValue = (float)(LoadValue * 0.001);
+                    }
+                    //speed
+                    if (SpeedUnit == (int)CtlUnit.mm_s)
+                    {
+                        LoadSpeed = LoadSpeed * 1;
+                    }
+                    else if (SpeedUnit == (int)CtlUnit.mm_min)
+                    {
+                        LoadSpeed = (float)(LoadSpeed / 60);
+                    }
+                    else if (SpeedUnit == (int)CtlUnit.um_min)
+                    {
+                        LoadSpeed = (float)(LoadSpeed / 1000 / 60);
+                    }
+                    else if (SpeedUnit == (int)CtlUnit.um_s)
+                    {
+                        LoadSpeed = (float)(LoadSpeed / 1000);
+                    }
+                    else if (SpeedUnit == (int)CtlUnit.mm_h)
+                    {
+                        LoadSpeed = (float)(LoadSpeed / 3600);
+                    }
+                    else if (SpeedUnit == (int)CtlUnit.um_h)
+                    {
+                        LoadSpeed = (float)(LoadSpeed / 1000 / 3600);
+                    }
+                }
+                else if (LoadType == (int)SENSOR.SENSOR_F)
+                {
+                    //value
+                    if (ValueUnit == (int)CtlUnit.N)
+                    {
+                        LoadValue = LoadValue * 1;
+                    }
+                    //else if (ValueUnit == (int)CtlUnit.um)
+                    //{
+                    //    LoadValue = (float)(LoadValue * 0.001);
+                    //}
+                    //speed
+                    if (SpeedUnit == (int)CtlUnit.N_S)
+                    {
+                        LoadSpeed = LoadSpeed * 1;
+                    }
+                    //else if (SpeedUnit == (int)CtlUnit.mm_min)
+                    //{
+                    //    LoadSpeed = (float)(LoadSpeed / 60);
+                    //}
+                }
+                //load time
+                sngTime = LoadValue / LoadSpeed;
+            }
+            else if (LoadMode == (int)CtlMode.Halt)
+            {
+                sngTime = 0;
+            }
+            return sngTime;
+        }
+
+        public static float Unit_TimeInv(float TimeValue, int TimeUnit)
+        {
+            float sngTime = 0;
+            if (TimeUnit == 0)
+            {
+                sngTime = TimeValue * 1;
+            }
+            else if (TimeUnit == 1)
+            {
+                sngTime = TimeValue * 60;
+            }
+            else if (TimeUnit == 2)
+            {
+                sngTime = TimeValue * 3600;
+            }
+            return sngTime;
         }
 
         public enum cmdType
@@ -472,6 +631,18 @@ namespace PipesClientTest
             delta_of_max=2,
             rate=3,
         }
-        
+
+        public enum FileType : int
+        {
+            ParaFile = 0,
+            DataFile = 1,
+            RecoFile = 2,
+            TempFile = 3,
+            EDCiFile = 4,
+            StopFile = 5,
+            KeepFile = 6,
+        }
+
+        //new public
     }
 }
