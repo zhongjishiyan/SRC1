@@ -15,21 +15,24 @@ namespace PipesClientTest
         public static DoSAall MeDoSAall;
         public static bool[] blnStartTest;
         public static bool[] blnPipeConnectOK;//pipe连接正常
-        public static int[] intPipeErrorNum;//pipe连接没有接收数据的次数        
+        public static int[] intPipeErrorNum;//pipe连接没有接收数据的次数     
+       
+    public const int MAX_SENSORS = 16;
+    public const int DoSAVersionEDC220 = 9;
+    public const int DoSAVersionEDCi15 = 10;
 
-        public const int MAX_SENSORS = 16;
-        public const int DoSAVersionEDC220 = 9;
-        public const int DoSAVersionEDCi15 = 10;
-        public const int ConnectToEdcAll = 10000;
-        public const int ConnectToEdcFuncID = 10001;
-        public const int CloseLink_FuncID = 10002;
-        public const int CloseAll = 10003;
-        public const int CloseLink_DoSAHdl = 10004;
-        public const int TestPara_Name = 10005;
+    public const int ConnectToEdcAll = 10000;
+    public const int ConnectToEdcFuncID = 10001;
+    public const int CloseLink_FuncID = 10002;
+    public const int CloseAll = 10003;
+    public const int CloseLink_DoSAHdl = 10004;
+    public const int TestPara_Name = 10005;
+
+   
 
 
 
-        //数据文件
+    //数据文件
         public static int[] EDC_STATE;//控制器联机状态
         public static float[] USED_BUFFER;  //缓冲区
         public static int[] CMD_BIT;

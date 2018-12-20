@@ -47,6 +47,13 @@ namespace PipesClientTest
             }
 
             GlobeVal.myconfigfile.SerializeNow(Application.StartupPath + @"\sys\系统设置.ini");
+
+            Demo.Init();
+
+            Demo.readdemo(Application.StartupPath + @"\demo\计算演示1.txt");
+
+            Demo.makesin();
+
             Close();
         }
 

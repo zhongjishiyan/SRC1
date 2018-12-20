@@ -19,7 +19,7 @@ namespace PipesClientTest
     public partial class Form1 : Form
     {
         private TransferData _TransferData = new TransferData();
-        private Random _rd=new Random();
+        private Random _rd = new Random(1);
         private PipeClient _pipeClient;
         private PipeServer _pipeServer;
         private ulong _ctr = 0;
@@ -55,7 +55,7 @@ namespace PipesClientTest
         /// the return value is nonzero.
         /// 
         [DllImport("Kernel32.dll")]
-        private static extern bool QueryPerformanceFrequency(out  long lpFrequency);
+        private static extern bool QueryPerformanceFrequency(out long lpFrequency);
 
         public bool GetTick(out long currentTickCount)
         {
@@ -145,14 +145,14 @@ namespace PipesClientTest
                 // _pipeClient.Send(_TransferData,"TestPipe",10000);
                 _pipeClient.Send(_vchar, "TestPipe", l, 10000);
                 _ctr++;
-                _TransferData.tcount = _ctr;              
+                _TransferData.tcount = _ctr;
             }
         }
 
         private void PipesMessageHandler(byte[] message)
         {
             _pipeServer._TransferCmd = ByteToTransferCmd<TransferCmd>(message);
-            this.toolStripStatusLabel2.Text  ="接收："+ _pipeServer._TransferCmd.tcount.ToString()+"        ";
+            this.toolStripStatusLabel2.Text = "接收：" + _pipeServer._TransferCmd.tcount.ToString() + "        ";
 
             //Display("FuncID:" + _pipeServer._TransferCmd.FuncID.ToString()+
             Display("cmdName:" + _pipeServer._TransferCmd.cmdName.ToString());
@@ -163,10 +163,10 @@ namespace PipesClientTest
             //modMain.blnPipeConnectOK[_pipeServer._TransferCmd.FuncID - 1] = true;
             //modMain.intPipeErrorNum[_pipeServer._TransferCmd.FuncID - 1] = 0
 
-         
 
 
-            switch (_pipeServer._TransferCmd.cmdName )
+
+            switch (_pipeServer._TransferCmd.cmdName)
             {
                 case modMain.ConnectToEdcAll:
                     ConnectToEdcAll();
@@ -180,16 +180,16 @@ namespace PipesClientTest
                 case (int)DoSA.DoSA_EXT_CMD.EXT_CMD_EDC_ON:
                     DriveOn();
                     break;
-                case (int)DoSA.DoSA_EXT_CMD.EXT_CMD_EDC_OFF :
+                case (int)DoSA.DoSA_EXT_CMD.EXT_CMD_EDC_OFF:
                     DriveOff();
                     break;
-                case (int) DoSA.DoSA_EXT_CMD.EXT_CMD_START:
+                case (int)DoSA.DoSA_EXT_CMD.EXT_CMD_START:
                     TestStart();
                     modMain.blnStartTest[_pipeServer._TransferCmd.FuncID - 1] = true;
 
-                   
-                   
-                        break;
+
+
+                    break;
                 case (int)DoSA.DoSA_EXT_CMD.EXT_CMD_STOP:
                     TestEnd();
                     break;
@@ -208,7 +208,7 @@ namespace PipesClientTest
                 case (int)DoSA.DoSA_EXT_CMD.EXT_CMD_BIT:
                     GET_CMD_BIT();
                     break;
-                case (int)modMain.TestPara_Name:                    
+                case (int)modMain.TestPara_Name:
                     ReadParaAndWriteEDC(_pipeServer._TransferCmd.FuncID);
                     break;
             }
@@ -254,7 +254,7 @@ namespace PipesClientTest
                     return modMain.MeDoSA[_pipeServer._TransferCmd.FuncID - 1].WriteMessage(Text);
                 }
             }
-            return DoSA.ERROR.OFFLINE ;
+            return DoSA.ERROR.OFFLINE;
         }
 
         ///----------------------------------------------------------------------
@@ -289,16 +289,16 @@ namespace PipesClientTest
         /// 保存前台软件的试验参数文件。   共100行，每行变量的个数固定为10个用逗号隔开
         ///----------------------------------------------------------------------
         private void SaveParaFile(int sysNo)
-        {            
+        {
             using (StreamWriter wf = File.AppendText(@_pipeServer._TransferCmd.strPara_FileName))
-            {                
+            {
                 string strline = "0,0,0,0,0,0,0,0,0,0";
                 //1到48行   48段试验
                 for (int intStep = 0; intStep < 48; intStep++)//48段试验段数，实际为12段，预留36段
-                {                   
-                    if (modMain.PARA_MODEn[sysNo - 1, intStep]==0 || modMain.PARA_MODEn[sysNo - 1, intStep] == 1)
+                {
+                    if (modMain.PARA_MODEn[sysNo - 1, intStep] == 0 || modMain.PARA_MODEn[sysNo - 1, intStep] == 1)
                     {
-                        strline = modMain.PARA_CTRLn[sysNo-1, intStep].ToString() + "," +
+                        strline = modMain.PARA_CTRLn[sysNo - 1, intStep].ToString() + "," +
                                     modMain.PARA_MODEn[sysNo - 1, intStep].ToString() + "," +
                                     modMain.PARA_Pn[sysNo - 1, intStep].ToString() + "," +
                                     modMain.PARA_Pn_Unit[sysNo - 1, intStep].ToString() + "," +
@@ -312,7 +312,7 @@ namespace PipesClientTest
                     else
                     {
                         strline = modMain.PARA_CTRLn[sysNo - 1, intStep].ToString() + "," +
-                                    modMain.PARA_MODEn[sysNo - 1, intStep].ToString() + "," +                                   
+                                    modMain.PARA_MODEn[sysNo - 1, intStep].ToString() + "," +
                                     modMain.PARA_OFFn[sysNo - 1, intStep].ToString() + "," +
                                     modMain.PARA_OFFn_Unit[sysNo - 1, intStep].ToString() + "," +
                                     modMain.PARA_AMPLn[sysNo - 1, intStep].ToString() + "," +
@@ -356,7 +356,7 @@ namespace PipesClientTest
                                     modMain.strFree.ToString();
                     wf.WriteLine(strline);
                 }
-              
+
                 //66
                 strline = modMain.TestType[sysNo - 1].ToString() + "," +
                                     modMain.TestLoadRange[sysNo - 1].ToString() + "," +
@@ -369,7 +369,7 @@ namespace PipesClientTest
                                     modMain.PARA_CREEP_TEST_TIME[sysNo - 1].ToString() + "," +
                                     modMain.PARA_LOOPS[sysNo - 1].ToString();
                 wf.WriteLine(strline);
-                               
+
                 //67
                 strline = modMain.PARA_IS_CTRL0[sysNo - 1].ToString() + "," +
                                     modMain.PARA_CTRL0[sysNo - 1].ToString() + "," +
@@ -395,7 +395,7 @@ namespace PipesClientTest
                                     modMain.PRINT_DE[sysNo - 1].ToString() + "," +
                                     modMain.strFree.ToString();
                 wf.WriteLine(strline);
-                
+
                 //69              
                 strline = modMain.END_SENSOR[sysNo - 1].ToString() + "," +
                                     modMain.END_MODE[sysNo - 1].ToString() + "," +
@@ -408,7 +408,7 @@ namespace PipesClientTest
                                     modMain.strFree.ToString() + "," +
                                     modMain.strFree.ToString();
                 wf.WriteLine(strline);
-                
+
                 //70
                 strline = modMain.LIMIT_SENSOR[sysNo - 1].ToString() + "," +
                                     modMain.LIMIT_PP[sysNo - 1].ToString() + "," +
@@ -488,7 +488,7 @@ namespace PipesClientTest
                 wf.WriteLine(strline);
 
                 //76到100行
-                for (int intHang=76;intHang<=100;intHang++)
+                for (int intHang = 76; intHang <= 100; intHang++)
                 {
                     strline = modMain.strFree.ToString() + "," +
                                     modMain.strFree.ToString() + "," +
@@ -557,8 +557,8 @@ namespace PipesClientTest
                             modMain.PARA_AMPLn[sysNo - 1, intStep] = float.Parse(arrParas[intStep + intArrNo, 4]);
                             modMain.PARA_AMPLn_Unit[sysNo - 1, intStep] = int.Parse(arrParas[intStep + intArrNo, 5]);
                             modMain.PARA_FREQn[sysNo - 1, intStep] = float.Parse(arrParas[intStep + intArrNo, 6]);
-                            modMain.PARA_CYCLEn[sysNo - 1, intStep] = long.Parse(arrParas[intStep + intArrNo, 7]);                           
-                        }                       
+                            modMain.PARA_CYCLEn[sysNo - 1, intStep] = long.Parse(arrParas[intStep + intArrNo, 7]);
+                        }
                     }
 
                     //49到60行   12段温度
@@ -569,7 +569,7 @@ namespace PipesClientTest
                         modMain.CREEP_TEMP_RAMP[sysNo - 1, intStep] = float.Parse(arrParas[intStep + intArrNo, 1]);
                         modMain.CREEP_TEMP_WAIT[sysNo - 1, intStep] = float.Parse(arrParas[intStep + intArrNo, 2]);
                         modMain.CREEP_TEMP_DELTA[sysNo - 1, intStep] = float.Parse(arrParas[intStep + intArrNo, 3]);
-                        modMain.CREEP_TEMP_END[sysNo - 1, intStep] = float.Parse(arrParas[intStep + intArrNo, 4]);                        
+                        modMain.CREEP_TEMP_END[sysNo - 1, intStep] = float.Parse(arrParas[intStep + intArrNo, 4]);
                     }
 
                     //61到65行   5段保存数据条件的设置
@@ -581,7 +581,7 @@ namespace PipesClientTest
                         modMain.SaveTimeTo[sysNo - 1, intStep] = arrParas[intStep + intArrNo, 2];
                         modMain.SaveTimeFromToUnit[sysNo - 1, intStep] = int.Parse(arrParas[intStep + intArrNo, 3]);
                         modMain.SaveTimeInv[sysNo - 1, intStep] = arrParas[intStep + intArrNo, 4];
-                        modMain.SaveTimeInvUnit[sysNo - 1, intStep] = int.Parse(arrParas[intStep + intArrNo, 5]);                       
+                        modMain.SaveTimeInvUnit[sysNo - 1, intStep] = int.Parse(arrParas[intStep + intArrNo, 5]);
                     }
 
                     //66
@@ -595,7 +595,7 @@ namespace PipesClientTest
                     modMain.TestMainLoad[sysNo - 1] = float.Parse(arrParas[intArrNo, 6]);
                     modMain.PARA_CREEP_STEPS[sysNo - 1] = int.Parse(arrParas[intArrNo, 7]);
                     modMain.PARA_CREEP_TEST_TIME[sysNo - 1] = double.Parse(arrParas[intArrNo, 8]);
-                    modMain.PARA_LOOPS[sysNo - 1] = long.Parse(arrParas[intArrNo, 9]);                  
+                    modMain.PARA_LOOPS[sysNo - 1] = long.Parse(arrParas[intArrNo, 9]);
 
                     //67
                     intArrNo = 66;
@@ -607,7 +607,7 @@ namespace PipesClientTest
                     modMain.PARA_P0[sysNo - 1] = float.Parse(arrParas[intArrNo, 5]);
                     modMain.PARA_P0_Unit[sysNo - 1] = int.Parse(arrParas[intArrNo, 6]);
                     modMain.PARA_T0[sysNo - 1] = float.Parse(arrParas[intArrNo, 7]);
-                    modMain.PARA_T0_Unit[sysNo - 1] = int.Parse(arrParas[intArrNo, 8]);                 
+                    modMain.PARA_T0_Unit[sysNo - 1] = int.Parse(arrParas[intArrNo, 8]);
 
                     //68
                     intArrNo = 67;
@@ -619,7 +619,7 @@ namespace PipesClientTest
                     modMain.PRINT_TIME[sysNo - 1] = float.Parse(arrParas[intArrNo, 5]);
                     modMain.PRINT_DS[sysNo - 1] = float.Parse(arrParas[intArrNo, 6]);
                     modMain.PRINT_DF[sysNo - 1] = float.Parse(arrParas[intArrNo, 7]);
-                    modMain.PRINT_DE[sysNo - 1] = float.Parse(arrParas[intArrNo, 8]);                   
+                    modMain.PRINT_DE[sysNo - 1] = float.Parse(arrParas[intArrNo, 8]);
 
                     //69
                     intArrNo = 68;
@@ -629,7 +629,7 @@ namespace PipesClientTest
                     modMain.END_VALUE_Unit[sysNo - 1] = int.Parse(arrParas[intArrNo, 3]);
                     modMain.END_ACTION[sysNo - 1] = int.Parse(arrParas[intArrNo, 4]);
                     modMain.VEND_ACTION[sysNo - 1] = float.Parse(arrParas[intArrNo, 5]);
-                    modMain.VEND_ACTION_Unit[sysNo - 1] = int.Parse(arrParas[intArrNo, 6]);                    
+                    modMain.VEND_ACTION_Unit[sysNo - 1] = int.Parse(arrParas[intArrNo, 6]);
 
                     //70
                     intArrNo = 69;
@@ -661,7 +661,7 @@ namespace PipesClientTest
                     modMain.SOFT_TEMP_VALUE_Unit[sysNo - 1] = int.Parse(arrParas[intArrNo, 3]);
                     modMain.SOFT_TEMP_ACTION[sysNo - 1] = int.Parse(arrParas[intArrNo, 4]);
                     modMain.SOFT_VTEMP_ACTION[sysNo - 1] = float.Parse(arrParas[intArrNo, 5]);
-                    modMain.SOFT_VTEMP_ACTION_Unit[sysNo - 1] = int.Parse(arrParas[intArrNo, 6]);                  
+                    modMain.SOFT_VTEMP_ACTION_Unit[sysNo - 1] = int.Parse(arrParas[intArrNo, 6]);
 
                     //73
                     intArrNo = 72;
@@ -671,14 +671,14 @@ namespace PipesClientTest
                     modMain.SOFT_Extension_WARN[sysNo - 1] = float.Parse(arrParas[intArrNo, 3]);
                     modMain.SOFT_TEMP_Fluct_WARN[sysNo - 1] = float.Parse(arrParas[intArrNo, 4]);
                     modMain.SOFT_TEMP_Grad_WARN[sysNo - 1] = float.Parse(arrParas[intArrNo, 5]);
-                    
+
                     //74
                     intArrNo = 73;
                     modMain.KeepTest[sysNo - 1] = int.Parse(arrParas[intArrNo, 0]);
                     modMain.SaveMode[sysNo - 1] = int.Parse(arrParas[intArrNo, 1]);
                     modMain.InvCycle[sysNo - 1] = long.Parse(arrParas[intArrNo, 2]);
                     modMain.InvLoop[sysNo - 1] = long.Parse(arrParas[intArrNo, 3]);
-                    
+
                     //75
                     intArrNo = 74;
                     modMain.Sample_Shape[sysNo - 1] = int.Parse(arrParas[intArrNo, 0]);
@@ -688,7 +688,7 @@ namespace PipesClientTest
                     modMain.Sample_Width_Unit[sysNo - 1] = int.Parse(arrParas[intArrNo, 4]);
                     modMain.Sample_Thickness[sysNo - 1] = float.Parse(arrParas[intArrNo, 5]);
                     modMain.Sample_Thickness_Unit[sysNo - 1] = int.Parse(arrParas[intArrNo, 6]);
-                    modMain.Sample_Gauge_Length[sysNo - 1] = float.Parse(arrParas[intArrNo, 7]); 
+                    modMain.Sample_Gauge_Length[sysNo - 1] = float.Parse(arrParas[intArrNo, 7]);
 
                     //76到100行
                     intArrNo = 75;
@@ -928,7 +928,7 @@ namespace PipesClientTest
         ///----------------------------------------------------------------------
         private void ConnectToEdcFuncID(int sysNo)
         {
-            DoSA.ERROR Error = DoSA.ERROR.INTERNAL ;
+            DoSA.ERROR Error = DoSA.ERROR.INTERNAL;
             //int sysNo = _pipeServer._TransferCmd.FuncID ;
 
             //Cursor.Current = Cursors.WaitCursor;
@@ -936,7 +936,7 @@ namespace PipesClientTest
 
             // make a new myDoSAall class
             //modMain.MeDoSAall = new DoSAall();
-            
+
             DoSA.DoSAState MeState = new DoSA.DoSAState();
             if (modMain.MeDoSA[sysNo - 1] != null)
             {//DoSAHdl自动赋值
@@ -953,7 +953,7 @@ namespace PipesClientTest
             {
                 modMain.MeDoSA[sysNo - 1] = new DoSA();
             }
-            if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDC220 )
+            if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDC220)
             {
                 Error = modMain.MeDoSA[sysNo - 1].OpenFunctionID(sysNo, modMain.DoSAVersionEDC220);
             }
@@ -961,7 +961,7 @@ namespace PipesClientTest
             {
                 Error = modMain.MeDoSA[sysNo - 1].OpenFunctionID(sysNo, modMain.DoSAVersionEDCi15);
             }
-                
+
             if (Error == DoSA.ERROR.NOERROR)
             {
                 Display("FunctionID:" + sysNo.ToString());
@@ -1007,13 +1007,13 @@ namespace PipesClientTest
             else if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDCi15)
             {
                 Error = modMain.MeDoSAall.OpenAll(modMain.DoSAVersionEDCi15);
-            }            
+            }
             if (Error == DoSA.ERROR.NOERROR)
             { // EDCs found
                 for (int i = 0; i < modMain.MeDoSAall.InfoTableValidEntries; i++)
                 { // show module info of connected EDCs
                     Display(string.Format("    {0}  DeviceID:{1:X8}  FunctionID:{2}  Serial:{3}  State:{4}",
-                            modMain.MeDoSAall.InfoTable[i].ModuleInfo.Name, modMain.MeDoSAall.InfoTable[i].ModuleInfo.DeviceID, 
+                            modMain.MeDoSAall.InfoTable[i].ModuleInfo.Name, modMain.MeDoSAall.InfoTable[i].ModuleInfo.DeviceID,
                             modMain.MeDoSAall.InfoTable[i].ModuleInfo.FunctionID,
                             modMain.MeDoSAall.InfoTable[i].ModuleInfo.SerNr, modMain.MeDoSAall.InfoTable[i].ModuleInfo.Status));
                     for (int sysNo = 0; sysNo < GlobeVal.myconfigfile.machinecount; sysNo++)
@@ -1034,8 +1034,8 @@ namespace PipesClientTest
             else
             { // ERROR: no EDC found
               // make a new myDoSA class
-                //myDoSA = new DoSA();
-                // show error
+              //myDoSA = new DoSA();
+              // show error
                 Display(string.Format("ERROR {0}: {1}", (int)Error, Error));
             }
             //Cursor.Current = Cursors.Default;
@@ -1103,8 +1103,12 @@ namespace PipesClientTest
             }
             if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.SIM)
             {
-                Demo.readdemo(Application.StartupPath + @"\demo\计算演示1.txt");
-               
+                Demo.mdemo[_pipeServer._TransferCmd.FuncID-1] = true;
+
+                Demo.mdemotime[_pipeServer._TransferCmd.FuncID-1] = System.Environment.TickCount / 1000.0;
+
+                Demo.mdemocount[_pipeServer._TransferCmd.FuncID - 1] = 0;
+
             }
         }
 
@@ -1119,8 +1123,8 @@ namespace PipesClientTest
             }
             if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.SIM)
             {
-                Demo.mdemoline = 0 ;
-                Demo.mdemo = false;
+                Demo.mdemoline[_pipeServer._TransferCmd.FuncID-1] = 0;
+                Demo.mdemo[_pipeServer._TransferCmd.FuncID-1] = false;
 
             }
         }
@@ -1214,7 +1218,7 @@ namespace PipesClientTest
         }
 
         private void cmdSend_Click(object sender, EventArgs e)
-        { 
+        {
             //timer1.Enabled = true;
         }
 
@@ -1239,15 +1243,15 @@ namespace PipesClientTest
         private void timer1_Tick(object sender, EventArgs e)
         {
             //Application.DoEvents();
-            if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.SIM )
+            if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.SIM)
             {
-                if (Demo.mdemo == true)
+
+
+                for (int i = 0; i < GlobeVal.myconfigfile.machinecount; i++)
                 {
-                    for (int i = 0; i < GlobeVal.myconfigfile.machinecount; i++)
+                    if (Demo.mdemo[i] == true)
                     {
-
-
-                        if (GlobeVal.myconfigfile.SimulationMode[i]==0)
+                        if (GlobeVal.myconfigfile.SimulationMode[i] == 2)
                         {
                             _TransferData.FuncID[i] = Convert.ToInt16(dataGridView1.Rows[1].Cells[i + 1].Value);
 
@@ -1255,15 +1259,69 @@ namespace PipesClientTest
 
                             _TransferData.ControlValue[i] = Convert.ToInt16(dataGridView1.Rows[3].Cells[i + 1].Value);
 
-                            _TransferData.CHANNEL_F[i] = Demo.mdemodata[Demo.mdemoline].load;
+                            _TransferData.CHANNEL_F[i] = Demo.mdemosindata[Demo.mdemoline[i]].load;
 
-                            _TransferData.CHANNEL_S[i] = Demo.mdemodata[Demo.mdemoline].pos;
+                            _TransferData.CHANNEL_S[i] = Demo.mdemosindata[Demo.mdemoline[i]].pos;
 
                             _TransferData.CHANNEL_4[i] = 0;
 
                             _TransferData.CHANNEL_5[i] = 0;
 
-                            _TransferData.CHANNEL_E[i] = Demo.mdemodata[Demo.mdemoline].ext ;
+                            _TransferData.CHANNEL_E[i] = Demo.mdemosindata[Demo.mdemoline[i]].ext;
+
+                            _TransferData.Unbalancedness[i] = Convert.ToSingle(dataGridView1.Rows[9].Cells[i + 1].Value);
+
+                            _TransferData.TemperatureControl[i] = Convert.ToSingle(dataGridView1.Rows[10].Cells[i + 1].Value);
+
+                            _TransferData.CHANNEL_7[i] = Convert.ToSingle(dataGridView1.Rows[11].Cells[i + 1].Value);
+
+                            _TransferData.CHANNEL_8[i] = Convert.ToSingle(dataGridView1.Rows[12].Cells[i + 1].Value);
+
+                            _TransferData.CHANNEL_9[i] = Convert.ToSingle(dataGridView1.Rows[13].Cells[i + 1].Value);
+
+                            _TransferData.TemperatureGradient[i] = Convert.ToSingle(dataGridView1.Rows[14].Cells[i + 1].Value);
+
+                            _TransferData.TOTAL_TIME[i] = Convert.ToSingle(dataGridView1.Rows[15].Cells[i + 1].Value);
+
+                            _TransferData.CYCLE_COUNT[i] =Demo.mdemocount[i];
+
+                            _TransferData.LOOP_COUNT[i] = Convert.ToInt64(dataGridView1.Rows[17].Cells[i + 1].Value);
+
+                            _TransferData.TOTAL_TIME[i] = Environment.TickCount / 1000.0;
+                            _TransferData.TEST_TIME[i] = Environment.TickCount / 1000.0;
+                            if (Environment.TickCount / 1000.0 - Demo.mdemotime[i] >= Demo.mdemosindata[Demo.mdemoline[i]].time)
+                            {
+                                Demo.mdemoline[i] = Demo.mdemoline[i] + 1;
+
+                                if (Demo.mdemoline[i] > Demo.mdemosindata.Count - 1)
+                                {
+                                    Demo.mdemoline[i] = 0;
+                                    Demo.mdemocount[i] = Demo.mdemocount[i] + 1;
+
+                                }
+
+                                Demo.mdemotime[i] = Environment.TickCount / 1000.0;
+                            }
+
+                        }
+
+                        if (GlobeVal.myconfigfile.SimulationMode[i] == 0)
+                        {
+                            _TransferData.FuncID[i] = Convert.ToInt16(dataGridView1.Rows[1].Cells[i + 1].Value);
+
+                            _TransferData.EDC_STATE[i] = Convert.ToInt16(dataGridView1.Rows[2].Cells[i + 1].Value);
+
+                            _TransferData.ControlValue[i] = Convert.ToInt16(dataGridView1.Rows[3].Cells[i + 1].Value);
+
+                            _TransferData.CHANNEL_F[i] = Demo.mdemodata[Demo.mdemoline[i]].load;
+
+                            _TransferData.CHANNEL_S[i] = Demo.mdemodata[Demo.mdemoline[i]].pos;
+
+                            _TransferData.CHANNEL_4[i] = Demo.mdemodata[Demo.mdemoline[i]].ext;
+
+                            _TransferData.CHANNEL_5[i] = Demo.mdemodata[Demo.mdemoline[i]].ext;
+
+                            _TransferData.CHANNEL_E[i] = Demo.mdemodata[Demo.mdemoline[i]].ext;
 
                             _TransferData.Unbalancedness[i] = Convert.ToSingle(dataGridView1.Rows[9].Cells[i + 1].Value);
 
@@ -1284,37 +1342,37 @@ namespace PipesClientTest
                             _TransferData.LOOP_COUNT[i] = Convert.ToInt64(dataGridView1.Rows[17].Cells[i + 1].Value);
 
                             _TransferData.TOTAL_TIME[i] = Environment.TickCount / 1000.0;
-                            _TransferData.TEST_TIME[i] = Demo.mdemodata[Demo.mdemoline].time;
-                            if (Environment.TickCount / 1000.0 - Demo.mdemotime >= Demo.mdemodata[Demo.mdemoline].time)
+                            _TransferData.TEST_TIME[i] = Demo.mdemodata[Demo.mdemoline[i]].time;
+                            if (Environment.TickCount / 1000.0 - Demo.mdemotime[i] >= Demo.mdemodata[Demo.mdemoline[i]].time)
                             {
-                                Demo.mdemoline = Demo.mdemoline + 1;
+                                Demo.mdemoline[i] = Demo.mdemoline[i] + 1;
                             }
-                            if(Demo.mdemoline > Demo.mdemodata.Count-1 )
+                            if (Demo.mdemoline[i] > Demo.mdemodata.Count - 1)
                             {
-                                Demo.mdemo = false; 
+                                Demo.mdemo[i] = false;
                             }
                         }
-                     }
-                }
-                else
-                {
-                    for (int i = 0; i < GlobeVal.myconfigfile.machinecount; i++)
+                    }
+
+
+                    else
                     {
+
                         _TransferData.FuncID[i] = Convert.ToInt16(dataGridView1.Rows[1].Cells[i + 1].Value);
 
                         _TransferData.EDC_STATE[i] = Convert.ToInt16(dataGridView1.Rows[2].Cells[i + 1].Value);
 
                         _TransferData.ControlValue[i] = Convert.ToInt16(dataGridView1.Rows[3].Cells[i + 1].Value);
 
-                        _TransferData.CHANNEL_F[i] = Convert.ToSingle(dataGridView1.Rows[4].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+                        _TransferData.CHANNEL_F[i] = Convert.ToSingle(dataGridView1.Rows[4].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble()/10.0);
 
-                        _TransferData.CHANNEL_S[i] = Convert.ToSingle(dataGridView1.Rows[5].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+                        _TransferData.CHANNEL_S[i] = Convert.ToSingle(dataGridView1.Rows[5].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble()/10.0);
 
-                        _TransferData.CHANNEL_4[i] = Convert.ToSingle(dataGridView1.Rows[6].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+                        _TransferData.CHANNEL_4[i] = Convert.ToSingle(dataGridView1.Rows[6].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble()/10.0);
 
-                        _TransferData.CHANNEL_5[i] = Convert.ToSingle(dataGridView1.Rows[7].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+                        _TransferData.CHANNEL_5[i] = Convert.ToSingle(dataGridView1.Rows[7].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble()/10.0);
 
-                        _TransferData.CHANNEL_E[i] = Convert.ToSingle(dataGridView1.Rows[8].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble());
+                        _TransferData.CHANNEL_E[i] = Convert.ToSingle(dataGridView1.Rows[8].Cells[i + 1].Value) + Convert.ToSingle(_rd.NextDouble()/10.0);
 
                         _TransferData.Unbalancedness[i] = Convert.ToSingle(dataGridView1.Rows[9].Cells[i + 1].Value);
 
@@ -1338,17 +1396,23 @@ namespace PipesClientTest
                         _TransferData.TEST_TIME[i] = Environment.TickCount / 1000.0;
 
                     }
+
+
+
                 }
+
+
+
             }
             else if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDCi15 || GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDC220)
             {
-                string CmdStr;              
+                string CmdStr;
                 for (int sysNo = 0; sysNo < GlobeVal.myconfigfile.machinecount; sysNo++)
                 {
                     if (modMain.MeDoSA[sysNo] != null)
                     {
                         if (modMain.MeDoSA[sysNo].DoSAHdl.ToInt32() != 0)
-                        {                           
+                        {
                             CmdStr = "107;1;0;0";//GET_USED_BUFFER
                             modMain.MeDoSA[sysNo].WriteMessage(CmdStr);
                             CmdStr = "102;1;0;0";//GET_EDC_STATE
@@ -1360,7 +1424,7 @@ namespace PipesClientTest
                     }//if (modMain.MeDoSA[sysNo - 1] != null)
                 }
             }
-           
+
         }
 
         private void _测试(object sender, EventArgs e)
@@ -1396,7 +1460,7 @@ namespace PipesClientTest
                System.Windows.Forms.MessageBoxButtons.YesNo,
                System.Windows.Forms.MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Yes)
             {
-                notifyIcon1.Visible= false;  //设置图标不可见
+                notifyIcon1.Visible = false;  //设置图标不可见
                 thread.Abort();
                 this.Close();                 //关闭窗体
                 this.Dispose();               //释放资源
@@ -1442,37 +1506,46 @@ namespace PipesClientTest
             {
                 b = new DataGridViewColumn();
                 b.HeaderText = "主机" + (i + 1).ToString().Trim();
-               dgvcell = new DataGridViewTextBoxCell();
+                dgvcell = new DataGridViewTextBoxCell();
                 b.CellTemplate = dgvcell;
                 dataGridView1.Columns.Add(b);
             }
 
-            string[] sname=new string[20];          
-            sname[0] ="编号";
-            sname[1]="类型";
-            sname[2]="状态";
-            sname[3]="控制值";
-            sname[4]="负荷[N]";
-            sname[5]="位移[mm]";
-            sname[6]="变形A[mm]";
-            sname[7]="变形B[mm]";
-            sname[8]="平均变形[mm]";
-            sname[9]="不平衡度[%]";
-            sname[10]="控温[℃]";           
-            sname[11]="上段温度";            
-            sname[12]="中段温度";          
-            sname[13]="下段温度";
-            sname[14]="温度梯度";
-            sname[15]="试验时间[s]";
-            sname[16]= "波形个数";
-            sname[17]="循环次数";
+            string[] sname = new string[20];
+            sname[0] = "编号";
+            sname[1] = "类型";
+            sname[2] = "状态";
+            sname[3] = "控制值";
+            sname[4] = "负荷[N]";
+            sname[5] = "位移[mm]";
+            sname[6] = "变形A[mm]";
+            sname[7] = "变形B[mm]";
+            sname[8] = "平均变形[mm]";
+            sname[9] = "不平衡度[%]";
+            sname[10] = "控温[℃]";
+            sname[11] = "上段温度";
+            sname[12] = "中段温度";
+            sname[13] = "下段温度";
+            sname[14] = "温度梯度";
+            sname[15] = "试验时间[s]";
+            sname[16] = "波形个数";
+            sname[17] = "循环次数";
             dataGridView1.Rows.Clear();
-            for (int i=0;i<=17;i++)
+            for (int i = 0; i <= 17; i++)
             {
-                string[] mt = new string[GlobeVal.myconfigfile.machinecount+1];
+                string[] mt = new string[GlobeVal.myconfigfile.machinecount + 1];
                 mt[0] = sname[i];
                 mt[1] = (i + 1).ToString();
-                mt[2] = (i + 3).ToString(); 
+                mt[2] = (i + 3).ToString();
+                if ((i==4) || (i==5)||(i==6)||(i==7)||(i==8))
+                {
+                    mt[1] = "0";
+                    mt[2] = "0";
+                }
+
+              
+                
+                
                 dataGridView1.Rows.Add(mt);
             }
             timer1.Enabled = true;
@@ -1480,7 +1553,7 @@ namespace PipesClientTest
 
         private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-           
+
         }
 
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
@@ -1518,8 +1591,8 @@ namespace PipesClientTest
             for (int sysNo = 0; sysNo < GlobeVal.myconfigfile.machinecount; sysNo++)
             {
                 //判断多长时间连接中断，中断后不采集数据，10秒
-                modMain.intPipeErrorNum[sysNo] ++;
-                if (modMain.intPipeErrorNum[sysNo]>1000)
+                modMain.intPipeErrorNum[sysNo]++;
+                if (modMain.intPipeErrorNum[sysNo] > 1000)
                 {
                     modMain.intPipeErrorNum[sysNo] = 1000;
                     modMain.blnPipeConnectOK[sysNo] = false;
@@ -1528,7 +1601,7 @@ namespace PipesClientTest
                 if (modMain.MeDoSA[sysNo] != null)
                 {
                     if (modMain.MeDoSA[sysNo].DoSAHdl.ToInt32() != 0)
-                    {                        
+                    {
                         if (modMain.blnStartTest[sysNo])
                         {
                             if (processMessage(sysNo) == DoSA.ERROR.NOERROR)
@@ -1549,7 +1622,7 @@ namespace PipesClientTest
         private DoSA.ERROR processMessage(int sysNo)//for (int sysNo = 0; sysNo < GlobeVal.myconfigfile.machinecount; sysNo++)
         {
             string Text = "";
-            double[] ReadEDCData = new double[modMain.MAX_SENSORS] ;
+            double[] ReadEDCData = new double[modMain.MAX_SENSORS];
             DoSA.ERROR Error = modMain.MeDoSA[sysNo].ReadMessage(ref Text);
             if (Error == DoSA.ERROR.NOERROR)
             { // process received message
@@ -1606,7 +1679,7 @@ namespace PipesClientTest
                         case DoSA.DoSA_EXT_CMD.EXT_CMD_NEW_DATA:
                             // show first 5 values
                             int count = 16;
-                            count = modMain .MAX_SENSORS ;
+                            count = modMain.MAX_SENSORS;
                             int idx = Convert.ToInt32(items[1]);
                             string buf = "";
 
@@ -1634,10 +1707,10 @@ namespace PipesClientTest
                                     break;
 
                                 case DoSA.DoSA_EXT_CMD_IDX.EXT_CMD_IDX_DATA_VALUE:
-                                    string strLog="";
+                                    string strLog = "";
                                     for (int i = 0; i < count; i++)
-                                    { 
-                                        buf += string.Format("DataValue{0}:{1}  ", i, items[2 + i]);                                        
+                                    {
+                                        buf += string.Format("DataValue{0}:{1}  ", i, items[2 + i]);
 
                                         if (items[2 + i] != "")
                                         {
@@ -1649,7 +1722,7 @@ namespace PipesClientTest
                                         }
                                         //if (i < count - 1)
                                         //{
-                                            strLog += ReadEDCData[i].ToString()+",";
+                                        strLog += ReadEDCData[i].ToString() + ",";
                                         //}
                                         //else
                                         //{
@@ -1659,7 +1732,7 @@ namespace PipesClientTest
 
                                     string strName;
                                     //strName = "D:\\" + "specimen" + "_" + (sysNo + 1).ToString() + "_" + (modMain.LineNumber[sysNo] / 1000).ToString()
-                                                        //+ "." + string.Format("{0:000}", sysNo + 1) + "D";//1000行一个文件
+                                    //+ "." + string.Format("{0:000}", sysNo + 1) + "D";//1000行一个文件
                                     strName = modMain.DataFile[sysNo];
                                     using (StreamWriter wf = File.AppendText(strName))
                                     {
@@ -1676,7 +1749,7 @@ namespace PipesClientTest
                                             modMain.strFree.ToString() + "," +
                                             modMain.strFree.ToString() + "," +
                                             modMain.strFree.ToString();
-                                    wf.WriteLine(modMain.LineNumber[sysNo].ToString() + "," + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "," + strLog);
+                                        wf.WriteLine(modMain.LineNumber[sysNo].ToString() + "," + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "," + strLog);
                                     }
                                     modMain.LineNumber[sysNo]++;
 
@@ -1712,7 +1785,7 @@ namespace PipesClientTest
                                     // CREEP_PRINT_V26,  NOT_ACTIVE,  );保留29
                                     // CREEP_PRINT_V27,  NOT_ACTIVE,  );保留30
 
-                                    _TransferData.FuncID[sysNo] = Convert.ToInt16(sysNo+1);
+                                    _TransferData.FuncID[sysNo] = Convert.ToInt16(sysNo + 1);
                                     _TransferData.EDC_STATE[sysNo] = Convert.ToInt16(modMain.EDC_STATE[sysNo]);
                                     //_TransferData.ControlValue[sysNo] = Convert.ToInt16(dataGridView1.Rows[3].Cells[sysNo + 1].Value);
                                     _TransferData.TOTAL_TIME[sysNo] = Convert.ToDouble(ReadEDCData[0]);
@@ -1721,7 +1794,7 @@ namespace PipesClientTest
                                     _TransferData.CHANNEL_F[sysNo] = Convert.ToSingle(ReadEDCData[3]);
                                     _TransferData.CHANNEL_E[sysNo] = Convert.ToSingle(ReadEDCData[4]);
                                     _TransferData.CHANNEL_4[sysNo] = Convert.ToSingle(ReadEDCData[5]);
-                                    _TransferData.CHANNEL_5[sysNo] = Convert.ToSingle(ReadEDCData[6]);                                    
+                                    _TransferData.CHANNEL_5[sysNo] = Convert.ToSingle(ReadEDCData[6]);
                                     //_TransferData.unbalancedness[sysNo] = Convert.ToSingle(ReadEDCData[i]);
                                     //_TransferData.Temperaturecontrol[sysNo] = Convert.ToSingle(ReadEDCData[i]);
                                     _TransferData.CHANNEL_7[sysNo] = Convert.ToSingle(ReadEDCData[7]);
