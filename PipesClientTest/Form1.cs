@@ -1235,6 +1235,11 @@ namespace PipesClientTest
                 SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_CLEAR_BUFFER, 0, 0);
                 SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_START, 0, 0);
             }
+            else if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.SIM)
+            {
+                Demo.readdemo(Application.StartupPath + @"\demo\计算演示1.txt");
+
+            }
             modMain.KeepTest[_pipeServer._TransferCmd.FuncID - 1] = 1;
             writeFile(0, modMain.strKeepfile, "", (int)modMain.FileType.KeepFile);
         }
@@ -1249,6 +1254,12 @@ namespace PipesClientTest
             if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDC220 || GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDCi15)
             {
                 SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_STOP, 0, 0);
+            }
+            else if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.SIM)
+            {
+                Demo.mdemoline[_pipeServer._TransferCmd.FuncID - 1] = 0;
+                Demo.mdemo[_pipeServer._TransferCmd.FuncID - 1] = false;
+
             }
         }
 
@@ -1315,6 +1326,8 @@ namespace PipesClientTest
                 // Frequency not supported
                 throw new Win32Exception("QueryPerformanceFrequency() function is not supported");
             }
+            GlobeVal.myconfigfile = new ConfigFile();
+            GlobeVal.myconfigfile = GlobeVal.myconfigfile.DeSerializeNow(Application.StartupPath + @"\sys\系统设置.ini");
             _TransferData.init();
             Interval = 10;
             thread = new Thread(new ThreadStart(ThreadProc));
@@ -1363,8 +1376,8 @@ namespace PipesClientTest
             {
                 Directory.CreateDirectory(modMain.strEDCfile);
             }
-            GlobeVal.myconfigfile = new ConfigFile();
-            GlobeVal.myconfigfile = GlobeVal.myconfigfile.DeSerializeNow(Application.StartupPath + @"\sys\系统设置.ini");            
+            //GlobeVal.myconfigfile = new ConfigFile();
+            //GlobeVal.myconfigfile = GlobeVal.myconfigfile.DeSerializeNow(Application.StartupPath + @"\sys\系统设置.ini");            
             ReadConfigFileAndInit();
             ReadTestFileAndContinue();
             _pipeServer.Listen("TestPipe1");
@@ -1377,7 +1390,7 @@ namespace PipesClientTest
             {
                 for (int i = 0; i < GlobeVal.myconfigfile.machinecount; i++)
                 {
-                    if (Demo.mdemo[i] == true)
+                    if ( Demo.mdemo[i] == true )
                     {
                         if (GlobeVal.myconfigfile.SimulationMode[i] == 2)
                         {
@@ -2653,6 +2666,9 @@ namespace PipesClientTest
             {
                 GlobeVal.myconfigfile.machinecount = 2;
                 modMain.initValue(GlobeVal.myconfigfile.machinecount);
+                Demo.Init();
+                Demo.readdemo(Application.StartupPath + @"\demo\计算演示1.txt");
+                Demo.makesin();
                 _TransferData.init();
                 if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDC220 || GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDCi15)
                 {

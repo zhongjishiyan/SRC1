@@ -33,12 +33,9 @@ namespace PipesClientTest
 
         public void SerializeNow(string filename)
         {
-
-            FileStream fileStream =
-            new FileStream(filename, FileMode.Create);
+            FileStream fileStream = new FileStream(filename, FileMode.Create);
             BinaryFormatter b = new BinaryFormatter();
             b.Serialize(fileStream, this);
-
             fileStream.Close();
         }
 
@@ -47,22 +44,12 @@ namespace PipesClientTest
             ConfigFile c = new PipesClientTest.ConfigFile ();
             try
             {
-
-
-                using (FileStream fileStream =
-                 new FileStream(filename,
-                 FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (FileStream fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     BinaryFormatter b = new BinaryFormatter();
-
-                    c = b.Deserialize(fileStream) as ConfigFile;
-
-                
+                    c = b.Deserialize(fileStream) as ConfigFile;                
                     fileStream.Close();
-
-
-
-                   }
+                }
             }
             catch (Exception e1)
             {
@@ -180,10 +167,10 @@ namespace PipesClientTest
         public void init()
         {
             int size = 100;
-            if (GlobeVal.myconfigfile.machinecount > 0)
-            {
-                size = GlobeVal.myconfigfile.machinecount;
-            }
+            //if (GlobeVal.myconfigfile.machinecount > 0)
+            //{
+            //    size = GlobeVal.myconfigfile.machinecount;
+            //}
             TOTAL_TIME = new double[size];
             TEST_TIME = new double[size];
             CHANNEL_S = new float[size];
