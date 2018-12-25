@@ -1209,6 +1209,7 @@ namespace PipesClientTest
         private void TestStart()
         {
             modMain.TimePass[_pipeServer._TransferCmd.FuncID - 1] = 0;
+            modMain.SOFT_TEMP_AddNum[_pipeServer._TransferCmd.FuncID - 1] = 0;
             string strName;
             //strName = modMain.ParaFile[_pipeServer._TransferCmd.FuncID - 1];
             //if (File.Exists(strName))
@@ -1445,8 +1446,7 @@ namespace PipesClientTest
                             }
 
                         }
-
-                        if (GlobeVal.myconfigfile.SimulationMode[i] == 0)
+                        else if (GlobeVal.myconfigfile.SimulationMode[i] == 0)
                         {
                             _TransferData.FuncID[i] = Convert.ToInt16(dataGridView1.Rows[1].Cells[i + 1].Value);
 
@@ -1494,8 +1494,6 @@ namespace PipesClientTest
                             }
                         }
                     }
-
-
                     else
                     {
 
@@ -2063,6 +2061,36 @@ namespace PipesClientTest
                                     {
 
                                     }
+
+                                    //软件判断条件结束试验
+                                    if (ReadEDCData[1] > Add_Value[1] && modMain.SOFT_TEMP_SENSOR[sysNo]==1 && modMain.CREEP_TEMP[sysNo, 0] > -900)
+                                    {
+                                        if (ReadEDCData[7] > modMain.SOFT_TEMP_VALUE[sysNo] || 
+                                            ReadEDCData[8] > modMain.SOFT_TEMP_VALUE[sysNo] || 
+                                            ReadEDCData[9] > modMain.SOFT_TEMP_VALUE[sysNo])
+                                        { 
+                                            modMain.SOFT_TEMP_AddNum[sysNo] = modMain.SOFT_TEMP_AddNum[sysNo] + 1;
+                                        }
+                                        if (modMain.SOFT_TEMP_AddNum[sysNo] > 10)
+                                        {
+                                            modMain.SOFT_TEMP_AddNum[sysNo] = 10;
+                                            TestEnd();
+
+                                            modMain.TEST_END[sysNo] = 2;
+                                            _TransferData.FuncID[sysNo] = Convert.ToInt16(sysNo + 1);
+                                            _TransferData.TEST_END[sysNo] = Convert.ToInt16(modMain.TEST_END[sysNo]);
+                                            Display("温度异常试验停止: " + Text);
+
+                                            writeFile(sysNo, modMain.DataFile[sysNo], buf, (int)modMain.FileType.StopFile);
+                                            buf = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "," + "温度异常停止试验" + "," + Text;
+                                            writeFile(sysNo, modMain.RecoFile[sysNo], buf, (int)modMain.FileType.RecoFile);
+
+                                            strEDC = modMain.strEDCfile + DateTime.Now.ToString("yyyy_MM_dd") + "." + "EDC";
+                                            buf = "FuncID=" + string.Format("{0:000}", sysNo + 1) + "," + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "," + Text;
+                                            writeFile(sysNo, strEDC, buf, (int)modMain.FileType.EDCiFile);
+                                        }
+                                    }
+
                                     //'数据文件顺序位置，共32个数据，用逗号隔开。  LineNumber行号 + DateTime当前日期时间 + _TransferData的30个变量                                 
                                     _TransferData.TOTAL_TIME[sysNo] = Convert.ToDouble(ReadEDCData[0]);
                                     _TransferData.TEST_TIME[sysNo] = Convert.ToSingle(ReadEDCData[1]);

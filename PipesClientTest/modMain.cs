@@ -156,6 +156,7 @@ namespace PipesClientTest
         public static int[] SOFT_TEMP_ACTION;           //停止后的动作；参考public enum Return_Action
         public static float[] SOFT_VTEMP_ACTION;           //停止后返回的速度；
         public static int[] SOFT_VTEMP_ACTION_Unit;           //停止后返回的速度的单位；单位参考public num CtlUnit
+        public static int[] SOFT_TEMP_AddNum;           //检测的次数
 
         //软件监测采集值是否超差，界面上显示数据的控件或者单元格背景红色报警但是不停止试验。
         public static int[] SOFT_IS_WARN;           //软件是否启动报警功能；0=不启动；1=启动；
@@ -315,6 +316,7 @@ namespace PipesClientTest
             SOFT_TEMP_ACTION = new int[machineNum];
             SOFT_VTEMP_ACTION = new float[machineNum];
             SOFT_VTEMP_ACTION_Unit = new int[machineNum];
+            SOFT_TEMP_AddNum = new int[machineNum];
 
             SOFT_IS_WARN = new int[machineNum];
             SOFT_Load_WARN = new float[machineNum];
@@ -382,6 +384,7 @@ namespace PipesClientTest
                 ADD_Free_14[sysNo] = 0;
                 ADD_Free_15[sysNo] = 0;
                 TimePass[sysNo] = 0;
+                SOFT_TEMP_AddNum[sysNo] = 0;
             }
         }
 
