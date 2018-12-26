@@ -146,6 +146,7 @@ namespace PipesClientTest
                 _pipeClient.Send(_vchar, "TestPipe", l, 10000);
                 _ctr++;
                 _TransferData.tcount = _ctr;
+                //add EDC get data
             }
         }
 
@@ -235,8 +236,12 @@ namespace PipesClientTest
                 case (int)modMain.Config_File:
                     ReadConfigFileAndInit();
                     break;
-                case (int)modMain.Test_Recovery://恢复试验
-                    //ReadConfigFileAndInit();
+                case (int)modMain.Test_Recovery://批量脱机恢复试验
+                    ReadTestFileAndContinue();
+                    break;
+                case (int)modMain.thread_Start:
+                    //thread.Start();
+                    toolStripButton1_Click(null, null);
                     break;
             }
         }
@@ -1379,8 +1384,8 @@ namespace PipesClientTest
             }
             //GlobeVal.myconfigfile = new ConfigFile();
             //GlobeVal.myconfigfile = GlobeVal.myconfigfile.DeSerializeNow(Application.StartupPath + @"\sys\系统设置.ini");            
-            ReadConfigFileAndInit();
-            ReadTestFileAndContinue();
+            ReadConfigFileAndInit();//AppleLabJ.exe  send  message
+            ReadTestFileAndContinue();//AppleLabJ.exe  send  message
             _pipeServer.Listen("TestPipe1");
         }
 
@@ -1725,6 +1730,7 @@ namespace PipesClientTest
             // send command string to EDC
             for (int sysNo = 0; sysNo < GlobeVal.myconfigfile.machinecount; sysNo++)
             {
+                Application.DoEvents();
                 //判断多长时间连接中断，中断后不采集数据，10秒
                 modMain.intPipeErrorNum[sysNo]++;
                 if (modMain.intPipeErrorNum[sysNo] > 1000)
@@ -1739,12 +1745,12 @@ namespace PipesClientTest
                     {
                         if (modMain.blnStartTest[sysNo])
                         {
-                            if (processMessage(sysNo) == DoSA.ERROR.NOERROR)
+                            while (processMessage(sysNo) == DoSA.ERROR.NOERROR)
                             {
 
                             }
                             //send command to EDC to get new data
-                            modMain.MeDoSA[sysNo].WriteMessage(CmdStr);
+                            //modMain.MeDoSA[sysNo].WriteMessage(CmdStr);
                         }
                     }//if (modMain.MeDoSA[sysNo].DoSAHdl.ToInt32() != 0)
                 }//if (modMain.MeDoSA[sysNo - 1] != null)
@@ -1756,6 +1762,8 @@ namespace PipesClientTest
         ///----------------------------------------------------------------------
         private DoSA.ERROR processMessage(int sysNo)//for (int sysNo = 0; sysNo < GlobeVal.myconfigfile.machinecount; sysNo++)
         {
+            //SendExtCmdGetData();
+            string CmdStr = "106;1;0;0";
             string Text = "";
             string buf = "";
             string strEDC = "";
@@ -1905,6 +1913,23 @@ namespace PipesClientTest
                                         //{
                                         //    strLog += ReadEDCData[i].ToString();
                                         //}
+                                    }
+
+                                    if (1==1)//test
+                                    {
+                                        modMain.SaveMode[sysNo] = 1;
+                                        modMain.PARA_P0[sysNo] = 500;
+                                        modMain.PARA_P0_Unit[sysNo] = (int)modMain.CtlUnit.N;
+                                        modMain.CREEP_TEMP[sysNo, 0] = -999;
+                                        modMain.PARA_CREEP_STEPS[sysNo] = 1;
+                                        modMain.PARA_CTRLn[sysNo,0] = 1;
+                                        modMain.PARA_MODEn[sysNo, 0] = 0;
+                                        modMain.PARA_Vn[sysNo, 0] = 1;
+                                        modMain.PARA_Vn_Unit[sysNo, 0] = (int)modMain.CtlUnit.N_S;
+                                        modMain.PARA_Pn[sysNo, 0] = 1000;
+                                        modMain.PARA_Pn_Unit[sysNo, 0] = (int)modMain.CtlUnit.N;
+                                        modMain.PARA_Tn[sysNo, 0] = 1;
+                                        modMain.PARA_Tn_Unit[sysNo, 0] = (int)modMain.CtlUnit.min;
                                     }
 
                                     //calculate
@@ -2257,8 +2282,10 @@ namespace PipesClientTest
                             writeFile(sysNo, strEDC, buf, (int)modMain.FileType.EDCiFile);
                             break;
                     }
-                }
-            }
+                }                
+            }//if (Error == DoSA.ERROR.NOERROR)
+            //send command to EDC to get new data
+            modMain.MeDoSA[sysNo].WriteMessage(CmdStr);
             return Error;
         }
 
@@ -2384,6 +2411,18 @@ namespace PipesClientTest
 
         private void toolStripButton6_Click(object sender, EventArgs e)
         {
+            _pipeServer._TransferCmd.FuncID = 1;
+            int sysNo = 1;
+            ConnectToEdcAll();
+            string strFileName = @"D:\CCSS\试验数据\EDCi50\20181226.001_Creep_Para";
+            modMain.ParaFile[sysNo - 1] = strFileName;// 
+            modMain.DataFile[sysNo - 1] = modMain.ParaFile[sysNo - 1].Substring(0, modMain.ParaFile[sysNo - 1].Length - 4) + "Data";
+            modMain.RecoFile[sysNo - 1] = modMain.ParaFile[sysNo - 1].Substring(0, modMain.ParaFile[sysNo - 1].Length - 4) + "Reco";
+            modMain.TempFile[sysNo - 1] = modMain.ParaFile[sysNo - 1].Substring(0, modMain.ParaFile[sysNo - 1].Length - 4) + "Temp";
+
+            DriveOn();
+            openTempFile(sysNo - 1, modMain.TempFile[sysNo - 1]);
+
             /*
             一个函数搞定，都不用去考虑递归（以前居然不知道），太强大了。
             string[] files = System.IO.Directory.GetFiles(_dir, "*.*", System.IO.SearchOption.AllDirectories);
@@ -2393,22 +2432,22 @@ namespace PipesClientTest
             string[] files = System.IO.Directory.GetDirectories(_dir, "*川*", System.IO.SearchOption.AllDirectories);
             结果files包含文件夹和文件。
             */
-            string dir = @"D:\CCSS\试验数据\";
-            string[] files = System.IO.Directory.GetFiles(dir, "*.??C", System.IO.SearchOption.AllDirectories);
-            for (int i = 0; i < files.Length; i++)
-            {
-                if (GetName(files[i]).Contains("700") == true)//文件名过滤      CreationTime返回文件的创建时间
-                {
-                    FileInfo fi = new FileInfo(files[i]);
-                    if (DateTime.Compare(Convert.ToDateTime(fi.LastWriteTime), Convert.ToDateTime("2018-11-19 00:00")) > 0 &&
-                        DateTime.Compare(Convert.ToDateTime(fi.LastWriteTime), Convert.ToDateTime("2018-11-20 00:00")) < 0)//文件修改日期  
-                    {
-                        this.listBox1.Items.Add(files[i]);
-                        this.listBox1.Items.Add(fi.LastWriteTime);
-                    }
-                }
+            //string dir = @"D:\CCSS\试验数据\";
+            //string[] files = System.IO.Directory.GetFiles(dir, "*.??C", System.IO.SearchOption.AllDirectories);
+            //for (int i = 0; i < files.Length; i++)
+            //{
+            //    if (GetName(files[i]).Contains("700") == true)//文件名过滤      CreationTime返回文件的创建时间
+            //    {
+            //        FileInfo fi = new FileInfo(files[i]);
+            //        if (DateTime.Compare(Convert.ToDateTime(fi.LastWriteTime), Convert.ToDateTime("2018-11-19 00:00")) > 0 &&
+            //            DateTime.Compare(Convert.ToDateTime(fi.LastWriteTime), Convert.ToDateTime("2018-11-20 00:00")) < 0)//文件修改日期  
+            //        {
+            //            this.listBox1.Items.Add(files[i]);
+            //            this.listBox1.Items.Add(fi.LastWriteTime);
+            //        }
+            //    }
 
-            }
+            //}
 
 
             //最小二乘法线性拟合方程
@@ -2560,6 +2599,10 @@ namespace PipesClientTest
                         for (int j = 0; j < col; j++)
                         {
                             arrParas[i, j] = (data[j]);
+                        }
+                        if (modMain.IsNumber(arrParas[i, 0]))
+                        {
+                            modMain.LineNumber[sysNo] = long.Parse(arrParas[i, 0]);
                         }
                     }
                     //赋值
@@ -2797,6 +2840,7 @@ namespace PipesClientTest
                             if (int.Parse(arrParas[i, 1]) > 0)
                             {
                                 ReadParaAndWriteEDC(i + 1, arrParas[i, 2], 0);
+                                openTempFile(i, modMain.TempFile[i]);
                                 modMain.blnStartTest[i] = true;
                             }
                             else
@@ -2821,7 +2865,116 @@ namespace PipesClientTest
                 //MessageBox.Show(ex.Message);
                 blnFileExist = false;
             }
-        }//ReadTestFileAndContinue    
+        }//ReadTestFileAndContinue
+
+        private void toolStripButton5_Click(object sender, EventArgs e)
+        {            
+            _pipeServer._TransferCmd.FuncID = 1;
+            //TestStart();
+            TestEnd();         
+        }
+
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {            
+            //SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_START, 0, 0);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_STEPS, (int)modMain.cmdType.Write, 1, (int)modMain.CtlUnit.No_Unit);
+
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CTRL0, (int)modMain.cmdType.Write, (double)modMain.SENSOR.SENSOR_S, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_MODE0, (int)modMain.cmdType.Write, (double)modMain.CtlMode.Ramp, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_V0, (int)modMain.cmdType.Write, 1, (int)modMain.CtlUnit.mm_min);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_P0, (int)modMain.cmdType.Write, 500, (int)modMain.CtlUnit.N);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_T0, (int)modMain.cmdType.Write, 10, (int)modMain.CtlUnit.Second);
+
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CTRL0 + 1, (int)modMain.cmdType.Write, (double)modMain.SENSOR.SENSOR_F, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_MODE0 + 1, (int)modMain.cmdType.Write, (double)modMain.CtlMode.Ramp, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_V0 + 1, (int)modMain.cmdType.Write, 10, (int)modMain.CtlUnit.N_S);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_P0 + 1, (int)modMain.cmdType.Write, 1000, (int)modMain.CtlUnit.N);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_T0 + 1, (int)modMain.cmdType.Write, 10, (int)modMain.CtlUnit.Second);
+
+            //SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CTRL0 + 2, (int)modMain.cmdType.Write, (double)modMain.SENSOR.SENSOR_F, (int)modMain.CtlUnit.No_Unit);
+            //SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_MODE0 + 2, (int)modMain.cmdType.Write, (double)modMain.CtlMode.Ramp, (int)modMain.CtlUnit.No_Unit);
+            //SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_V0 + 2, (int)modMain.cmdType.Write, 10, (int)modMain.CtlUnit.N_S);
+            //SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_P0 + 2, (int)modMain.cmdType.Write, 400, (int)modMain.CtlUnit.N);
+            //SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_T0 + 2, (int)modMain.cmdType.Write, 60, (int)modMain.CtlUnit.Second);
+
+            if (1 == 1)
+            {
+                SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_TEMP_SENSOR, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_NOT_ACTIVE, (int)modMain.CtlUnit.No_Unit);
+            }
+            else
+            {
+                SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_TEMP_SENSOR, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_8, (int)modMain.CtlUnit.No_Unit);
+                SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_TEMP0, (int)modMain.cmdType.Write, 80, (int)modMain.CtlUnit.C);
+                SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_TEMP_RAMP0, (int)modMain.cmdType.Write, 10, (int)modMain.CtlUnit.C_min);
+                SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_TEMP_WAIT0, (int)modMain.cmdType.Write, 10, (int)modMain.CtlUnit.min);
+                SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_TEMP, (int)modMain.cmdType.Write, 100, (int)modMain.CtlUnit.C);
+                SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_TEMP_RAMP, (int)modMain.cmdType.Write, 20, (int)modMain.CtlUnit.C_min);
+                SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_TEMP_WAIT, (int)modMain.cmdType.Write, 60, (int)modMain.CtlUnit.min);
+                SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_TEMP_END, (int)modMain.cmdType.Write, 30, (int)modMain.CtlUnit.C);
+                SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_TEMP_DELTA, (int)modMain.cmdType.Write, 3, (int)modMain.CtlUnit.C);
+            }
+
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_LOOPS, (int)modMain.cmdType.Write, 1, (int)modMain.CtlUnit.No_Unit);
+
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_TEST_TIME, (int)modMain.cmdType.Write, 3600000, (int)modMain.CtlUnit.Second);//最大10000天     0*60*60
+
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_EXTENSION_LIMIT, (int)modMain.cmdType.Write, 10, (int)modMain.CtlUnit.mm);
+
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_REF_TIME, (int)modMain.cmdType.Write, 30, (int)modMain.CtlUnit.min);
+
+            //'时间到，正常结束，返回P0
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_VRETURN_ACTION, (int)modMain.cmdType.Write, 1, (int)modMain.CtlUnit.mm_min);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_RETURN_ACTION, (int)modMain.cmdType.Write, (double)modMain.Return_Action.return_p0, (int)modMain.CtlUnit.No_Unit);
+
+            //'数据采集条件
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_TIME_DOUBLE, (int)modMain.cmdType.Write, 1, (int)modMain.CtlUnit.Second);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_DS, (int)modMain.cmdType.Write, 0.01, (int)modMain.CtlUnit.mm);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_DF, (int)modMain.cmdType.Write, 100, (int)modMain.CtlUnit.N);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_DE, (int)modMain.cmdType.Write, 0.005, (int)modMain.CtlUnit.mm);
+
+            //'数据显示顺序位置
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V00, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CREEP_TOTAL_TIME, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V01, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CREEP_TEST_TIME, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V02, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_S, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V03, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_F, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V04, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_E, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V05, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_4, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V06, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_5, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V07, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_7, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V08, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_8, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V09, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_9, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V10, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CYCLE_COUNT, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V11, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_LOOP_COUNT, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V12, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CREEP_TEST_STEP, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V13, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CTRLSTATE1, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V14, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_NOT_ACTIVE, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_PRINT_V15, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_NOT_ACTIVE, (int)modMain.CtlUnit.No_Unit);
+
+            //'试验停止返回状态
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_END_SENSOR, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_F, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_END_MODE, (int)modMain.cmdType.Write, (double)modMain.EndMode.below, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_END_VALUE, (int)modMain.cmdType.Write, 400, (int)modMain.CtlUnit.N);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_END_ACTION, (int)modMain.cmdType.Write, (double)modMain.Return_Action.drive_off, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_VEND_ACTION, (int)modMain.cmdType.Write, 1.1, (int)modMain.CtlUnit.mm_min);
+
+            //'极限保护  +-5000N
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_LIMIT_SENSOR, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_F, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_LIMIT_PP, (int)modMain.cmdType.Write, 5000, (int)modMain.CtlUnit.N);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_LIMIT_MM, (int)modMain.cmdType.Write, -5000, (int)modMain.CtlUnit.N);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_LIMIT_ACTION, (int)modMain.cmdType.Write, (double)modMain.Return_Action.return_p0, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_VLIMIT_ACTION, (int)modMain.cmdType.Write, 1.2, (int)modMain.CtlUnit.mm_min);
+
+            //'试验时间显示方式 递增
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_MODE_T, (int)modMain.cmdType.Write, 0, (int)modMain.CtlUnit.No_Unit);
+
+            //'在EDC上显示的变量
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_DSP_SENS1, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_F, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_DSP_SENS2, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_S, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_DSP_SENS3, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_4, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_DSP_SENS4, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_5, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_DSP_SENS5, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_E, (int)modMain.CtlUnit.No_Unit);
+            SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_DSP_SENS6, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_8, (int)modMain.CtlUnit.No_Unit);
+        }
 
         //new procedure
     }

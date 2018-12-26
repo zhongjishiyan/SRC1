@@ -155,6 +155,7 @@
             this.toolStripButton3.Size = new System.Drawing.Size(52, 52);
             this.toolStripButton3.Text = "toolStripButton3";
             this.toolStripButton3.ToolTipText = "关闭试样夹具";
+            this.toolStripButton3.Click += new System.EventHandler(this.toolStripButton3_Click);
             // 
             // toolStripButton4
             // 
@@ -176,6 +177,7 @@
             this.toolStripButton5.Size = new System.Drawing.Size(52, 52);
             this.toolStripButton5.Text = "toolStripButton5";
             this.toolStripButton5.ToolTipText = "打开简化对话框";
+            this.toolStripButton5.Click += new System.EventHandler(this.toolStripButton5_Click);
             // 
             // toolStripButton6
             // 

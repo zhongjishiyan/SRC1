@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Doli.DoSANet;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace PipesClientTest
 {   
@@ -26,7 +27,7 @@ namespace PipesClientTest
         public const int TestPara_Name = 10005;
         public const int Config_File = 10006;//前台软件发送来的设备数量和控制器类型等配置文件
         public const int Test_Recovery = 10007;//恢复试验
-
+        public const int thread_Start = 10008;//
 
 
 
@@ -644,6 +645,21 @@ namespace PipesClientTest
             EDCiFile = 4,
             StopFile = 5,
             KeepFile = 6,
+        }
+
+        public static bool IsNumber(String strNumber)
+        {
+            Regex objNotNumberPattern = new Regex("[^0-9.-]");
+            Regex objTwoDotPattern = new Regex("[0-9]*[.][0-9]*[.][0-9]*");
+            Regex objTwoMinusPattern = new Regex("[0-9]*[-][0-9]*[-][0-9]*");
+            String strValidRealPattern = "^([-]|[.]|[-.]|[0-9])[0-9]*[.]*[0-9]+$";
+            String strValidIntegerPattern = "^([-]|[0-9])[0-9]*$";
+            Regex objNumberPattern = new Regex("(" + strValidRealPattern + ")|(" + strValidIntegerPattern + ")");
+
+            return !objNotNumberPattern.IsMatch(strNumber) &&
+                   !objTwoDotPattern.IsMatch(strNumber) &&
+                   !objTwoMinusPattern.IsMatch(strNumber) &&
+                   objNumberPattern.IsMatch(strNumber);
         }
 
         //new public
