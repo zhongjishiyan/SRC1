@@ -53,7 +53,6 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.listBox1 = new System.Windows.Forms.ListBox();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tmrEDC = new System.Windows.Forms.Timer(this.components);
@@ -124,6 +123,7 @@
             this.toolStrip1.Size = new System.Drawing.Size(973, 55);
             this.toolStrip1.TabIndex = 5;
             this.toolStrip1.Text = "toolStrip1";
+            this.toolStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStrip1_ItemClicked);
             // 
             // toolStripButton1
             // 
@@ -199,6 +199,7 @@
             this.toolStripButton7.Size = new System.Drawing.Size(52, 52);
             this.toolStripButton7.Text = "toolStripButton7";
             this.toolStripButton7.ToolTipText = "帮助";
+            this.toolStripButton7.Click += new System.EventHandler(this.toolStripButton7_Click);
             // 
             // imageList1
             // 
@@ -268,7 +269,6 @@
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.listBox1);
             this.tabPage1.Controls.Add(this.dataGridView1);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
@@ -277,15 +277,6 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "设置";
             this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // listBox1
-            // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.ItemHeight = 12;
-            this.listBox1.Location = new System.Drawing.Point(328, 3);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(627, 484);
-            this.listBox1.TabIndex = 9;
             // 
             // dataGridView1
             // 
@@ -377,7 +368,6 @@
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Timer tmrEDC;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
-        private System.Windows.Forms.ListBox listBox1;
     }
 }
 

@@ -41,7 +41,7 @@ namespace PipesClientTest
         public static string[] ParaFile;     //参数文件名
         //参数文件名命名规则，蠕变后缀名为  .XXX_Creep_Para，其中XXX为设备号码，不足3位前面用0占位，例如1号设备为001；
         //1号设备蠕变参数文件后缀名为 .001_Creep_Para；持久参数后缀名为 .001_Ruptu_Para；；松弛参数后缀名为 .001_Relax_Para；
-        public static string[] DataFile;     //数据文件名
+        public static string[] DataFile;     //数据文件名    10000行1.3M，
         //1号设备蠕变数据文件后缀名为 .001_Creep_Data；持久参数后缀名为 .001_Ruptu_Data；；松弛参数后缀名为 .001_Relax_Data；
         public static string[] RecoFile;     //记录文件名
         public static string[] TempFile;     //

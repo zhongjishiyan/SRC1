@@ -32,9 +32,11 @@ namespace PipesClientTest
 
         private void button1_Click(object sender, EventArgs e)
         {
-            int l;          
+            int l;
+
             int.TryParse(textBox1.Text, out l);
             GlobeVal.myconfigfile.machinecount = l;
+
             GlobeVal.myconfigfile.mode = comboBox1.SelectedIndex;
             modMain.initValue(GlobeVal.myconfigfile.machinecount);
 
@@ -47,6 +49,8 @@ namespace PipesClientTest
             Demo.Init();
             Demo.readdemo(Application.StartupPath + @"\demo\计算演示1.txt");
             Demo.makesin();
+            Demo.readcreepdemo(Application.StartupPath + @"\demo\蠕变0109.dat");
+
             Close();
         }
 

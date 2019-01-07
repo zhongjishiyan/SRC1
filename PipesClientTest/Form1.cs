@@ -13,11 +13,13 @@ using System.Runtime.InteropServices;
 using PipesClientTest;
 using System.IO;
 using Doli.DoSANet;
-
+using AppleLabApplication;
 namespace PipesClientTest
 {
     public partial class Form1 : Form
     {
+        CComLibrary.FileStruct fma;
+
         private TransferData _TransferData = new TransferData();
         private Random _rd = new Random(1);
         private PipeClient _pipeClient;
@@ -1243,11 +1245,18 @@ namespace PipesClientTest
             }
             else if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.SIM)
             {
-                Demo.readdemo(Application.StartupPath + @"\demo\计算演示1.txt");
+                Demo.mdemo[_pipeServer._TransferCmd.FuncID - 1] = true;
+
+                Demo.mdemotime[_pipeServer._TransferCmd.FuncID - 1] = System.Environment.TickCount / 1000.0;
+
+                Demo.mdemocount[_pipeServer._TransferCmd.FuncID - 1] = 0;
 
             }
             modMain.KeepTest[_pipeServer._TransferCmd.FuncID - 1] = 1;
             writeFile(0, modMain.strKeepfile, "", (int)modMain.FileType.KeepFile);
+
+
+
         }
 
         ///----------------------------------------------------------------------
@@ -1451,6 +1460,67 @@ namespace PipesClientTest
                             }
 
                         }
+
+
+                        if (GlobeVal.myconfigfile.SimulationMode[i] == 1)
+                        {
+                            _TransferData.FuncID[i] = Convert.ToInt16(dataGridView1.Rows[1].Cells[i + 1].Value);
+
+                            _TransferData.EDC_STATE[i] = Convert.ToInt16(dataGridView1.Rows[2].Cells[i + 1].Value);
+
+                            _TransferData.ControlValue[i] = Convert.ToInt16(dataGridView1.Rows[3].Cells[i + 1].Value);
+
+                            _TransferData.CHANNEL_F[i] = Demo.mdemocreepdata[Demo.mdemoline[i]].load;
+
+                            _TransferData.CHANNEL_S[i] = Demo.mdemocreepdata[Demo.mdemoline[i]].pos;
+
+                            _TransferData.CHANNEL_4[i] = Demo.mdemocreepdata[Demo.mdemoline[i]].exta;
+
+                            _TransferData.CHANNEL_5[i] = Demo.mdemocreepdata[Demo.mdemoline[i]].extb;
+
+                            _TransferData.CHANNEL_E[i] = Demo.mdemocreepdata[Demo.mdemoline[i]].ext;
+
+                            _TransferData.Unbalancedness[i] = Convert.ToSingle(dataGridView1.Rows[9].Cells[i + 1].Value);
+
+                            _TransferData.TemperatureControl[i] = Convert.ToSingle(dataGridView1.Rows[10].Cells[i + 1].Value);
+
+                            _TransferData.CHANNEL_7[i] = Convert.ToSingle(dataGridView1.Rows[11].Cells[i + 1].Value);
+
+                            _TransferData.CHANNEL_8[i] = Convert.ToSingle(dataGridView1.Rows[12].Cells[i + 1].Value);
+
+                            _TransferData.CHANNEL_9[i] = Convert.ToSingle(dataGridView1.Rows[13].Cells[i + 1].Value);
+
+                            _TransferData.TemperatureGradient[i] = Convert.ToSingle(dataGridView1.Rows[14].Cells[i + 1].Value);
+
+                            _TransferData.TOTAL_TIME[i] = Convert.ToSingle(dataGridView1.Rows[15].Cells[i + 1].Value);
+
+                            _TransferData.CYCLE_COUNT[i] = Convert.ToInt64(dataGridView1.Rows[16].Cells[i + 1].Value);
+
+                            _TransferData.LOOP_COUNT[i] = Convert.ToInt64(dataGridView1.Rows[17].Cells[i + 1].Value);
+
+                            _TransferData.TOTAL_TIME[i] = Demo.mdemocreepdata[Demo.mdemoline[i]].time;
+                            _TransferData.TEST_TIME[i] = Demo.mdemocreepdata[Demo.mdemoline[i]].time;
+
+
+                            // if (Environment.TickCount / 1000.0 - Demo.mdemotime[i] >= Demo.mdemocreepdata[Demo.mdemoline[i]].time)
+
+                            //  if (Environment.TickCount / 1000.0 - Demo.mdemotime[i] >= 0.03)
+                            {
+                                Demo.mdemoline[i] = Demo.mdemoline[i] + 1;
+
+                                //     Demo.mdemotime[i] = Environment.TickCount / 1000.0;
+
+                            }
+                            if (Demo.mdemoline[i] > Demo.mdemocreepdata.Count - 1)
+                            {
+                                Demo.mdemo[i] = false;
+                            }
+
+
+
+
+
+                        }
                         else if (GlobeVal.myconfigfile.SimulationMode[i] == 0)
                         {
                             _TransferData.FuncID[i] = Convert.ToInt16(dataGridView1.Rows[1].Cells[i + 1].Value);
@@ -1630,6 +1700,7 @@ namespace PipesClientTest
 
         private void toolStripButton4_Click(object sender, EventArgs e)
         {
+            timer1.Enabled = false;
             Form2 f = new Form2();
             f.ShowDialog();
 
@@ -1679,12 +1750,16 @@ namespace PipesClientTest
             {
                 string[] mt = new string[GlobeVal.myconfigfile.machinecount + 1];
                 mt[0] = sname[i];
-                mt[1] = (i + 1).ToString();
-                mt[2] = (i + 3).ToString();
+                for (int j = 1; j <= GlobeVal.myconfigfile.machinecount; j++)
+                {
+                    mt[j] = (i + j).ToString();
+                }
                 if ((i==4) || (i==5)||(i==6)||(i==7)||(i==8))
                 {
-                    mt[1] = "0";
-                    mt[2] = "0";
+                    for (int j = 1; j <= GlobeVal.myconfigfile.machinecount; j++)
+                    {
+                        mt[j] = "0";
+                    }
                 }
                 dataGridView1.Rows.Add(mt);
             }
@@ -2735,11 +2810,13 @@ namespace PipesClientTest
             blnFileExist = true;
             if (blnFileExist)//init
             {
-                GlobeVal.myconfigfile.machinecount = 2;
+              
                 modMain.initValue(GlobeVal.myconfigfile.machinecount);
                 Demo.Init();
                 Demo.readdemo(Application.StartupPath + @"\demo\计算演示1.txt");
                 Demo.makesin();
+                Demo.readcreepdemo(Application.StartupPath + @"\demo\蠕变0109.dat");
+
                 _TransferData.init();
                 if (GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDC220 || GlobeVal.myconfigfile.mode == (int)modMain.CtlerType.EDCi15)
                 {
@@ -2791,12 +2868,18 @@ namespace PipesClientTest
                 {
                     string[] mt = new string[GlobeVal.myconfigfile.machinecount + 1];
                     mt[0] = sname[i];
-                    mt[1] = (i + 1).ToString();
-                    mt[2] = (i + 3).ToString();
+                    for(int j=1;j<= GlobeVal.myconfigfile.machinecount;j++)
+                    {
+                        mt[j] = (i + j).ToString();
+                    }
+
+                    
                     if ((i == 4) || (i == 5) || (i == 6) || (i == 7) || (i == 8))
                     {
-                        mt[1] = "0";
-                        mt[2] = "0";
+                        for (int j = 1; j <= GlobeVal.myconfigfile.machinecount; j++)
+                        {
+                            mt[j] = "0";
+                        }
                     }
                     dataGridView1.Rows.Add(mt);
                 }
@@ -2974,6 +3057,24 @@ namespace PipesClientTest
             SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_DSP_SENS4, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_5, (int)modMain.CtlUnit.No_Unit);
             SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_DSP_SENS5, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_E, (int)modMain.CtlUnit.No_Unit);
             SendExtCmd(DoSA.DoSA_EXT_CMD.EXT_CMD_PARA_CREEP_DSP_SENS6, (int)modMain.cmdType.Write, (double)DoSA.DoSA_VARIABLE.VAR_CHANNEL_8, (int)modMain.CtlUnit.No_Unit);
+        }
+
+        private void toolStripButton7_Click(object sender, EventArgs e)
+        {
+            if (ClsStaticStation.m_Global.mycls == null)
+            {
+                ClsStaticStation.m_Global.mycls = new ClsStaticStation.ItemSignalStation();
+            }
+            fma = new CComLibrary.FileStruct();
+            
+            fma = fma.DeSerializeNowFor(@"D:\cSharp学习\instron非标2017蠕变\instrontest\bin\Debug\AppleLabJ\device\1\para\方法.dat");
+
+            MessageBox.Show(fma.malarmvalue1.ToString());
+        }
+
+        private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
         }
 
         //new procedure

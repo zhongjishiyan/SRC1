@@ -15,6 +15,8 @@ namespace PipesClientTest
             public float load;
             public float ext;
             public float cmd;
+            public float exta;
+            public float extb;
             public double time;
             public float count;            
         }
@@ -106,6 +108,98 @@ namespace PipesClientTest
                     }
                 }
             }           
+        }
+
+        public static void readcreepdemo(string fileName)
+        {
+            int i = -1;
+            int j = 0;
+
+
+            char[] sp;
+            char[] sp1;
+            string[] ww;
+
+            string line;
+
+
+
+            sp = new char[2];
+            sp1 = new char[2];
+            mdemocreepdata.Clear();
+
+            using (StreamReader sr = new StreamReader(fileName, Encoding.Default))
+            {
+
+                while ((line = sr.ReadLine()) != null)
+                {
+                    i = i + 1;
+                    if (i == 0)
+                    {
+
+                        sp[0] = Convert.ToChar(" ");
+
+                        ww = line.Split(sp);
+
+
+
+                        for (j = 0; j < ww.Length; j++)
+                        {
+
+
+
+
+
+                        }
+
+                    }
+
+                    else if (i == 1)
+                    {
+
+                        sp[0] = Convert.ToChar(" ");
+
+                        ww = line.Split(sp);
+
+
+
+
+
+                        for (j = 0; j < ww.Length; j++)
+                        {
+
+
+
+
+                        }
+                    }
+                    else
+                    {
+
+                        sp[0] = Convert.ToChar(" ");
+
+                        ww = line.Split(sp);
+
+                        int L = ww.Length;
+
+                        demodata m = new demodata();
+
+                        m.time = Convert.ToDouble(ww[17]) * 3600;
+                        m.load = Convert.ToSingle(ww[3]);
+                        m.pos = Convert.ToSingle(ww[4]);
+                        m.ext = Convert.ToSingle(ww[7]);
+                        m.exta = Convert.ToSingle(ww[5]);
+                        m.extb = Convert.ToSingle(ww[6]);
+
+                        mdemocreepdata.Add(m);
+
+                    }
+                }
+
+            }
+
+
+
         }
     }
 }

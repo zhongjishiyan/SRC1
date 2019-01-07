@@ -36,9 +36,17 @@
     <ApplicationIcon>VTM.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AppleLabApplication, Version=1.0.0.0, Culture=neutral, PublicKeyToken=fb4ab1cf5e6d31b4, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\cSharp学习\instron非标2017蠕变\instroncreep\bin\Debug\AppleLabApplication.dll</HintPath>
+    </Reference>
     <Reference Include="DoSANet, Version=10.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\DoSANet.dll</HintPath>
+    </Reference>
+    <Reference Include="NationalInstruments.Common.Native, Version=12.0.35.253, Culture=neutral, PublicKeyToken=18cbae0f9955702a, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\cSharp学习\instron非标2017给陈\instrontest\bin\Debug\NationalInstruments.Common.Native.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
